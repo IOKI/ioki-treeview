@@ -70,5 +70,5 @@ module.exports = function(grunt) {
     grunt.registerTask('serve', ['concurrent:server']);
     grunt.registerTask('build', ['jshint', 'compass']);
 
-    grunt.registerTask('default', ['build']);
+    grunt.registerTask('default', ['build', 'serve']);
 };
