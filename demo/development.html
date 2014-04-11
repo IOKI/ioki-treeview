@@ -9,18 +9,30 @@
 
     <link rel="stylesheet" href="css/ioki-treeview.css"/>
 </head>
-<body>
+<body ng-app="app">
     <div class="container">
         <div class="page-header">
             <h1>TreeView</h1>
             <p>Component for AngularJS. Developed by IOKI Team.</p>
         </div>
-        <div class="workarea">
+        <div class="workarea" ng-controller="WorkareaController">
             <!-- Enjoy this space and use it wisely. Good Luck! -->
-            <p>This is were we work.</p>
+            <div class="row show-grid">
+                <div class="col-md-3">
+                    <treeview treedata="treeData" treesettings="treeSettings"></treeview>
+                </div>
+                <div class="col-md-9">Content area</div>
+            </div>
         </div>
     </div>
 
     <script src="../bower_components/angular/angular.js"></script>
+
+    <script src="app.js"></script>
+    <script src="js/workarea-controller.js"></script>
+
+    <script src="../src/js/recursionhelper.js"></script>
+    <script src="../src/js/treeview-directive.js"></script>
+    <script src="../src/js/treeview-filters.js"></script>
 </body>
 </html>

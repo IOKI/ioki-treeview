@@ -46,12 +46,13 @@ treeview > div:hover .add-node, treeview > div:hover .remove-node, treeview > di
 treeview > ul {
   padding-left: 10px;
   display: none;
+  list-style-type: none;
 }
-/* line 50, ../../src/scss/ioki-treeview.scss */
+/* line 51, ../../src/scss/ioki-treeview.scss */
 treeview > ul.expanded {
   display: block;
 }
-/* line 53, ../../src/scss/ioki-treeview.scss */
+/* line 54, ../../src/scss/ioki-treeview.scss */
 treeview > ul.expanded > div .expander {
   color: #000;
 }

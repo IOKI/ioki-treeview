@@ -46,6 +46,7 @@ treeview {
     > ul {
         padding-left: 10px;
         display: none;
+        list-style-type: none;
 
         &.expanded {
             display: block;
