@@ -4,6 +4,8 @@
   "ignore": [
     "demo",
     "node_modules",
+    ".idea",
+    ".sass-cache",
     ".bowerrc",
     ".gitignore",
     ".jshintrc",

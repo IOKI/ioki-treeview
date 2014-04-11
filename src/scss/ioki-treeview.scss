@@ -1,0 +1,58 @@
+treeview {
+    display: block;
+
+    > div {
+        padding: 2px 2px 2px 6px;
+        border-radius: 2px;
+
+        .expander {
+            width: 13px;
+            padding-right: 5px;
+            cursor: pointer;
+            color: #949494;
+        }
+
+        &.expanded {
+            .expander {
+                color: #000;
+            }
+        }
+
+        .add-node, .remove-node {
+            margin-right: 15px;
+            float: right;
+            cursor: pointer;
+            line-height: 20px;
+        }
+
+        .add-node {
+            color: forestgreen;
+        }
+
+        .remove-node{
+            color: darkred;
+        }
+
+        &:hover, &.selected {
+            color: #fff;
+            background: #006da4;
+
+            .add-node, .remove-node, .expander{
+                color: #fff;
+            }
+        }
+    }
+
+    > ul {
+        padding-left: 10px;
+        display: none;
+
+        &.expanded {
+            display: block;
+
+            > div .expander {
+                color: #000;
+            }
+        }
+    }
+}

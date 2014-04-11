@@ -13,6 +13,14 @@ module.exports = function(grunt) {
                 reporter: require('jshint-stylish')
             }
         },
+        compass: {
+            dist: {
+                options: {
+                    sassDir: 'src/scss',
+                    cssDir: 'demo/css'
+                }
+            }
+        },
         connect: {
             server: {
                 options: {
@@ -34,6 +42,14 @@ module.exports = function(grunt) {
                     spawn: false,
                     livereload: true
                 }
+            },
+            css: {
+                files: ['src/scss/*.scss'],
+                tasks: ['compass'],
+                options: {
+                    spawn: false,
+                    livereload: true
+                }
             }
         },
         concurrent: {
@@ -45,13 +61,14 @@ module.exports = function(grunt) {
     });
 
     grunt.loadNpmTasks('grunt-contrib-jshint');
+    grunt.loadNpmTasks('grunt-contrib-compass');
     grunt.loadNpmTasks('grunt-contrib-connect');
     grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-concurrent');
 
     grunt.registerTask('test', ['jshint']);
     grunt.registerTask('serve', ['concurrent:server']);
-    grunt.registerTask('build', ['jshint']);
+    grunt.registerTask('build', ['jshint', 'compass']);
 
     grunt.registerTask('default', ['build']);
 };
