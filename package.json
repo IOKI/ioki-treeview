@@ -1,0 +1,12 @@
+{
+  "name": "ioki-treeview",
+  "version": "0.0.1",
+  "author": "IOKI",
+  "description": "TreeView component for AngularJS. Developed by IOKI Team.",
+  "dependencies": {},
+  "devDependencies": {
+    "grunt": "^0.4.4",
+    "grunt-contrib-jshint": "^0.9.2",
+    "jshint-stylish": "^0.1.5"
+  }
+}
