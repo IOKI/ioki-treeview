@@ -69,6 +69,16 @@ module.exports = function(grunt) {
             }
         },
         watch: {
+            js: {
+                files: [
+                    'src/js/**/*.js'
+                ],
+                tasks: ['jshint'],
+                options: {
+                    spawn: false,
+                    livereload: true
+                }
+            },
             html: {
                 files: [
                     'demo/**/*.html'
