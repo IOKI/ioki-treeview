@@ -4,6 +4,7 @@
   "ignore": [
     "demo",
     "node_modules",
+    "src",
     ".idea",
     ".sass-cache",
     ".bowerrc",

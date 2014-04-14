@@ -1,7 +1,6 @@
-'use strict';
-
 angular.module('ioki.treeview', ['RecursionHelper'])
     .provider('$treeview', function () {
+        'use strict';
 
         var defaults = this.defaults = {
             prefixClass: 'treeview-',
@@ -158,13 +157,15 @@ angular.module('ioki.treeview', ['RecursionHelper'])
         };
     })
     .directive("treeview", function (RecursionHelper, $treeview) {
+        'use strict';
+        
         return {
             restrict: "E",
             scope: {
                 treedata: '=',
                 treesettings: '='
             },
-            templateUrl: "../src/js/treeview.tpl.html",
+            templateUrl: "../src/js/ioki-treeview.tpl.html",
             compile: function (element) {
                 return RecursionHelper.compile(element, function (scope, element) {
                     var options = {scope: scope, element: element, treesettings: {}};

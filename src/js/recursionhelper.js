@@ -1,12 +1,11 @@
-/*
- * An Angular service which helps with creating recursive directives.
- * @author Mark Lagendijk
- * @license MIT
- */
-
-'use strict';
-
 angular.module('RecursionHelper', []).factory('RecursionHelper', ['$compile', function($compile){
+    'use strict';
+
+    /*
+     * An Angular service which helps with creating recursive directives.
+     * @author Mark Lagendijk
+     * @license MIT
+     */
     return {
         /**
          * Manually compiles the element, fixing the recursion loop.

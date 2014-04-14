@@ -1,7 +1,7 @@
-'use strict';
-
 angular.module('ioki.treeview')
     .filter('getNodeIcon', function() {
+        'use strict';
+
         /**
          * getNodeIcon filter
          *
