@@ -3,9 +3,6 @@
 angular.module('app').controller('WorkareaController', function ($scope) {
 
     $scope.treeSettings = {
-        expandable: true,
-        showExpander: true,
-        selectable: false,
         icons: {
             'directory': {
                 closed: 'fa-folder-o',

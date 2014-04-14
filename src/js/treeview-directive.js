@@ -7,12 +7,23 @@ angular.module('ioki.treeview', ['RecursionHelper'])
             prefixClass: 'treeview-',
             prefixEvent: 'treeview',
             treesettings: {
-                expandable: true,           // define if user can expand / collapse nodes
-                expandAll: false,           // define if all nodes should be expanded on loading the tree
-                showExpander: true,         // define if user see expanders
-                deletable: true,            // define if user can delete nodes
-                addable: true,              // define if user can add nodes
-                selectable: false           // define if user can select node
+                /* define if user can expand / collapse nodes */
+                expandable: true,
+
+                /* define if all nodes should be expanded on loading the tree */
+                expandAll: true,
+
+                /* define if user see expanders */
+                showExpander: true,
+
+                /* define if user can delete nodes */
+                deletable: false,
+
+                /* define if user can add nodes */
+                addable: false,
+
+                /* define if user can select node */
+                selectable: false
             }
         };
 
