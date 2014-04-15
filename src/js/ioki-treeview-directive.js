@@ -15,8 +15,8 @@ angular.module('ioki.treeview', ['RecursionHelper'])
                 /* define if user see expanders */
                 showExpander: true,
 
-                /* define if user can delete nodes */
-                deletable: false,
+                /* define if user can remove nodes */
+                removable: false,
 
                 /* define if user can add nodes */
                 addable: true,
@@ -27,7 +27,9 @@ angular.module('ioki.treeview', ['RecursionHelper'])
                 /* treeview offers custom methods via controller's scope */
                 customMethods: {
                     /* addNode method */
-                    addNode: null
+                    addNode: null,
+                    /* removeNode method */
+                    removeNode: null
                 }
             }
         };
@@ -55,7 +57,7 @@ angular.module('ioki.treeview', ['RecursionHelper'])
                 scope = $treeview.$scope = options.scope;
                 scope.treesettings = options.treesettings;
 
-                if (typeof scope.$parent.$parent.treedata === 'undefined' || !options.treesettings.deletable) {
+                if (typeof scope.$parent.$parent.treedata === 'undefined' || !options.treesettings.removable) {
                     scope.treedata.$removable = false;
                 } else {
                     scope.treedata.$removable = true;
@@ -67,6 +69,10 @@ angular.module('ioki.treeview', ['RecursionHelper'])
 
                 scope.$addNode = function () {
                     $treeview.addNode();
+                };
+
+                scope.$removeNode = function () {
+                    $treeview.removeNode();
                 };
 
                 scope.$toggleNode = function () {
@@ -129,6 +135,40 @@ angular.module('ioki.treeview', ['RecursionHelper'])
                     if (options.treesettings.addable) {
                         if (typeof options.treesettings.customMethods.addNode === 'function') {
                             options.treesettings.customMethods.addNode(scope);
+                        }
+                    }
+                };
+
+                /**
+                 * Method removeNode
+                 *  1) available in TreeView's scope
+                 *  2) requires property "removable" in treesettings to be true
+                 *  3) (optionally) can use customMethod removeNode
+                 *
+                 * This method removes current node
+                 */
+                $treeview.removeNode = function () {
+                    var node = scope.treedata,
+                        parent, subnodesArray, index;
+
+                    if (options.treesettings.removable) {
+                        if (typeof options.treesettings.customMethods.removeNode === 'function') {
+                            options.treesettings.customMethods.removeNode(scope);
+                        } else {
+                            parent = scope.$parent.$parent.treedata;
+
+                            if (typeof parent !== 'undefined') {
+                                subnodesArray = parent.subnodes;
+
+                                if (angular.isArray(subnodesArray)) {
+                                    index = subnodesArray.indexOf(node);
+
+                                    if (index > -1) {
+                                        subnodesArray.splice(index,1);
+                                    }
+                                }
+                            }
+
                         }
                     }
                 };

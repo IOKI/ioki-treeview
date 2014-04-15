@@ -46,6 +46,8 @@ angular.module('app').controller('WorkareaController', function ($scope, $modal,
      * Put your TreeView customization here.
      */
     $scope.treeSettings = {
+        addable: true,
+        removable: true,
         icons: {
             'directory': {
                 closed: 'fa-folder-o',
