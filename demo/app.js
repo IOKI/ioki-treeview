@@ -1,5 +1,6 @@
 'use strict';
 
 angular.module('app', [
-    'ioki.treeview'
+    'ioki.treeview',
+    'ui.bootstrap'
 ]);

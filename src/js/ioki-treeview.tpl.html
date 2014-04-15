@@ -10,16 +10,16 @@
 
     <!-- remove node icon -->
     <i class="remove-node fa fa-minus-circle"
-       ng-click="removeNode(treedata)"
+       ng-click=""
        ng-class="{'invisible': !treedata.$removable}"></i>
 
     <!-- add node icon -->
     <i class="add-node fa fa-plus-circle"
-       ng-click="addNode(treesettings.callbacks.addNode)"
+       ng-click="$addNode()"
        ng-class="{'invisible': (!treesettings.addable || !treedata.subnodes)}"></i>
 </div>
 <ul ng-class="{'expanded': treedata.expanded}">
-    <li ng-repeat="subnode in treedata.subnodes">
+    <li ng-repeat="subnode in treedata.subnodes track by $index">
         <treeview treedata="subnode" treesettings="treesettings"></treeview>
     </li>
 </ul>

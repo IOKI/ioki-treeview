@@ -19,10 +19,16 @@ angular.module('ioki.treeview', ['RecursionHelper'])
                 deletable: false,
 
                 /* define if user can add nodes */
-                addable: false,
+                addable: true,
 
                 /* define if user can select node */
-                selectable: false
+                selectable: false,
+
+                /* treeview offers custom methods via controller's scope */
+                customMethods: {
+                    /* addNode method */
+                    addNode: null
+                }
             }
         };
 
@@ -59,6 +65,10 @@ angular.module('ioki.treeview', ['RecursionHelper'])
                     scope.treedata.expanded = true;
                 }
 
+                scope.$addNode = function () {
+                    $treeview.addNode();
+                };
+
                 scope.$toggleNode = function () {
                     $treeview.toggleNode();
                 };
@@ -67,12 +77,27 @@ angular.module('ioki.treeview', ['RecursionHelper'])
                     $treeview.selectNode();
                 };
 
+                /**
+                 * Method toggleNode
+                 *  1) available in TreeView's scope
+                 *  2) requires property "expandable" in treesettings to be true
+                 *
+                 * This method change state "expanded" in current node for opposite state
+                 */
                 $treeview.toggleNode = function () {
                     if (options.treesettings.expandable) {
                         scope.treedata.expanded = !scope.treedata.expanded;
                     }
                 };
 
+                /**
+                 * Method selectNode
+                 *  1) available in TreeView's scope
+                 *  2) requires property "selectable" in treesettings to be true
+                 *
+                 * This method mark current node as selected and unselect other nodes in TreeView
+                 * If selected node is the same as current node it will be unselect
+                 */
                 $treeview.selectNode = function () {
                     var state;
 
@@ -85,6 +110,26 @@ angular.module('ioki.treeview', ['RecursionHelper'])
 
                         // change state of clicked element on opposite state
                         scope.treedata.selected = !state;
+                    }
+                };
+
+                /**
+                 * Method addNode
+                 *  1) available in TreeView's scope
+                 *  2) requires property "addable" in treesettings to be true
+                 *  3) requires customMethod addNode to be function
+                 *
+                 * This method adds new node to subnodes for current node
+                 *
+                 * Method allows to use custom function for manage adding process.
+                 * It could be useful if developer want to implement pop-up or drop down with possibility
+                 * to choose what kind of node user want to add.
+                 */
+                $treeview.addNode = function () {
+                    if (options.treesettings.addable) {
+                        if (typeof options.treesettings.customMethods.addNode === 'function') {
+                            options.treesettings.customMethods.addNode(scope);
+                        }
                     }
                 };
 
