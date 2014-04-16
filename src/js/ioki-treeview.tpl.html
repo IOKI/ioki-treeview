@@ -2,19 +2,19 @@
      ng-click="$selectNode()">
     <!-- expander icon -->
     <i class="expander fa"
-       ng-class="(treedata.subnodes && treesettings.showExpander) ? (treedata.expanded ? 'fa-caret-down' : 'fa-caret-right') : 'invisible'"
+       ng-class="(treedata.subnodes && treesettings.showExpander) ? (treedata.expanded ? treesettings.interfaceIcons.openDir : treesettings.interfaceIcons.closeDir) : 'invisible'"
        ng-click="$toggleNode()"></i>
 
     <!-- node icon -->
     <i class="fa {{treedata | getNodeIcon: treesettings.icons}}"></i> {{ treedata.name }}
 
     <!-- remove node icon -->
-    <i class="remove-node fa fa-minus-circle"
+    <i class="remove-node fa {{treesettings.interfaceIcons.removeNode}}"
        ng-click="$removeNode()"
        ng-class="{'invisible': !treedata.$removable}"></i>
 
     <!-- add node icon -->
-    <i class="add-node fa fa-plus-circle"
+    <i class="add-node fa {{treesettings.interfaceIcons.addNode}}"
        ng-click="$addNode()"
        ng-class="{'invisible': (!treesettings.addable || !treedata.subnodes)}"></i>
 </div>

@@ -6,6 +6,17 @@ angular.module('ioki.treeview', ['RecursionHelper'])
             prefixClass: 'treeview-',
             prefixEvent: 'treeview',
             treesettings: {
+                /* beside your own template you can also configure specific icon in interface */
+                interfaceIcons: {
+                    /* icon for adding new nodes */
+                    addNode: 'fa-plus-circle',
+                    /* icon for removing nodes */
+                    removeNode: 'fa-minus-circle',
+                    /* icon for open directory */
+                    openDir: 'fa-caret-down',
+                    /* icon for close directory */
+                    closeDir: 'fa-caret-right'
+                },
                 /* define if user can expand / collapse nodes */
                 expandable: true,
 
