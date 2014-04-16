@@ -113,6 +113,19 @@ angular.module('ioki.treeview', ['RecursionHelper'])
                     }
                 }
 
+                /*
+                 copy defaults interface icons if they are not defined in specific options for instance
+                 */
+                if (typeof config.treesettings.interfaceIcons !== 'undefined') {
+                    for (var prop in defaults.treesettings.interfaceIcons) {
+                        if (defaults.treesettings.interfaceIcons.hasOwnProperty(prop)) {
+                            if (typeof config.treesettings.interfaceIcons[prop] === 'undefined') {
+                                options.treesettings.interfaceIcons[prop] = defaults.treesettings.interfaceIcons[prop];
+                            }
+                        }
+                    }
+                }
+
                 scope = $treeview.$scope = options.scope;
                 scope.treesettings = options.treesettings;
 
