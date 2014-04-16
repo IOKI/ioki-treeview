@@ -36,7 +36,7 @@ module.exports = function(grunt) {
         copy: {
             main: {
                 files: [
-                    {expand: true, src: ['demo/css/ioki-treeview.css', 'src/js/ioki-treeview.tpl.html'], dest: './', flatten: true}
+                    {expand: true, src: ['demo/css/ioki-treeview.css'], dest: './', flatten: true}
                 ]
             }
         },
@@ -45,6 +45,7 @@ module.exports = function(grunt) {
                 src: [
                     'src/js/recursionhelper.js',
                     'src/js/ioki-treeview-directive.js',
+                    'src/js/ioki-treeview.tpl.html.js',
                     'src/js/ioki-treeview-filters.js'
                 ],
                 dest: 'ioki-treeview.js'
@@ -68,6 +69,16 @@ module.exports = function(grunt) {
                 }
             }
         },
+        ngtemplates:  {
+            app: {
+                options: {
+                    module: 'ioki.treeview',
+                    url: function(url) { return url.replace('src/js/', 'templates/').replace('.tpl.html', ''); }
+                },
+                src: 'src/js/*.tpl.html',
+                dest: 'src/js/ioki-treeview.tpl.html.js'
+            }
+        },
         watch: {
             js: {
                 files: [
@@ -75,6 +86,16 @@ module.exports = function(grunt) {
                     'demo/**/*.js'
                 ],
                 tasks: ['jshint'],
+                options: {
+                    spawn: false,
+                    livereload: true
+                }
+            },
+            tpl: {
+                files: [
+                    'src/js/**/*.tpl.html'
+                ],
+                tasks: ['ngtemplates'],
                 options: {
                     spawn: false,
                     livereload: true
@@ -113,11 +134,12 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-concat');
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-contrib-cssmin');
+    grunt.loadNpmTasks('grunt-angular-templates');
     grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-concurrent');
 
     grunt.registerTask('test', ['jshint']);
-    grunt.registerTask('release', ['test', 'copy', 'concat', 'uglify', 'cssmin']);
+    grunt.registerTask('release', ['test', 'copy', 'ngtemplates', 'concat', 'uglify', 'cssmin']);
     grunt.registerTask('serve', ['concurrent:server']);
     grunt.registerTask('build', ['jshint', 'compass']);
 

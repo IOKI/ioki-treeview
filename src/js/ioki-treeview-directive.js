@@ -241,7 +241,7 @@ angular.module('ioki.treeview', ['RecursionHelper'])
             return TreeViewFactory;
         };
     })
-    .directive("treeview", function (RecursionHelper, $treeview) {
+    .directive("treeview", function (RecursionHelper, $treeview, $templateCache) {
         'use strict';
         
         return {
@@ -250,7 +250,7 @@ angular.module('ioki.treeview', ['RecursionHelper'])
                 treedata: '=',
                 treesettings: '='
             },
-            templateUrl: "../src/js/ioki-treeview.tpl.html",
+            templateUrl: 'templates/ioki-treeview',
             compile: function (element) {
                 return RecursionHelper.compile(element, function (scope, element) {
                     var options = {scope: scope, element: element, treesettings: {}};
