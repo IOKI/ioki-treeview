@@ -6,6 +6,11 @@ angular.module('ioki.treeview', ['RecursionHelper'])
             prefixClass: 'treeview-',
             prefixEvent: 'treeview',
             treesettings: {
+                /* base class for icons system
+                 * e.g. 'fa' for FontAwesome, 'glyphicons' for Glyphicons etc.
+                 * we use FontAwesome by default
+                 */
+                iconsBaseClass: 'fa',
                 /* beside your own template you can also configure specific icon in interface */
                 interfaceIcons: {
                     /* icon for adding new nodes */

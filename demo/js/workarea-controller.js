@@ -48,6 +48,7 @@ angular.module('app').controller('WorkareaController', function ($scope, $modal,
     $scope.treeSettings = {
         addable: true,
         removable: true,
+        iconsBaseClass: 'fa',
         icons: {
             'directory': {
                 closed: 'fa-folder-o',
