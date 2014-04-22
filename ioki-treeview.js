@@ -102,7 +102,8 @@ angular.module('ioki.treeview', ['RecursionHelper'])
 
             function TreeViewFactory (config) {
                 var $treeview = {},
-                    options, scope;
+                    options, scope,
+                    prop;
 
                 options = $treeview.$options = angular.extend({}, defaults, config);
 
@@ -110,7 +111,7 @@ angular.module('ioki.treeview', ['RecursionHelper'])
                  copy defaults options for treeview (@var defaults)
                  if option specific for instance (@var config) wasn't defined
                  */
-                for (var prop in defaults.treesettings) {
+                for (prop in defaults.treesettings) {
                     if (defaults.treesettings.hasOwnProperty(prop)) {
                         if (typeof config.treesettings[prop] === 'undefined') {
                             options.treesettings[prop] = defaults.treesettings[prop];
@@ -122,7 +123,7 @@ angular.module('ioki.treeview', ['RecursionHelper'])
                  copy defaults interface icons if they are not defined in specific options for instance
                  */
                 if (typeof config.treesettings.interfaceIcons !== 'undefined') {
-                    for (var prop in defaults.treesettings.interfaceIcons) {
+                    for (prop in defaults.treesettings.interfaceIcons) {
                         if (defaults.treesettings.interfaceIcons.hasOwnProperty(prop)) {
                             if (typeof config.treesettings.interfaceIcons[prop] === 'undefined') {
                                 options.treesettings.interfaceIcons[prop] = defaults.treesettings.interfaceIcons[prop];
@@ -318,7 +319,7 @@ angular.module('ioki.treeview', ['RecursionHelper'])
             return TreeViewFactory;
         };
     })
-    .directive("treeview", function (RecursionHelper, $treeview, $templateCache) {
+    .directive("treeview", ['RecursionHelper', '$treeview', '$templateCache', function (RecursionHelper, $treeview) {
         'use strict';
         
         return {
@@ -340,7 +341,7 @@ angular.module('ioki.treeview', ['RecursionHelper'])
                 });
             }
         };
-    });
+    }]);
 angular.module('ioki.treeview').run(['$templateCache', function($templateCache) {
   'use strict';
 

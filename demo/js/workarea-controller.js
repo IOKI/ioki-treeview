@@ -48,6 +48,7 @@ angular.module('app').controller('WorkareaController', function ($scope, $modal,
     $scope.treeSettings = {
         addable: true,
         removable: true,
+        selectable: false,
         iconsBaseClass: 'fa',
         icons: {
             'directory': {
