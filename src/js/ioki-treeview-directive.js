@@ -6,12 +6,13 @@ angular.module('ioki.treeview', ['RecursionHelper'])
             prefixClass: 'treeview-',
             prefixEvent: 'treeview',
             treesettings: {
+                template: 'templates/ioki-treeview',
                 /* base class for icons system
                  * e.g. 'fa' for FontAwesome, 'glyphicons' for Glyphicons etc.
                  * we use FontAwesome by default
                  */
                 iconsBaseClass: 'fa',
-                /* beside your own template you can also configure specific icon in interface */
+                /* beside your own template you can also configure specific icon in the interface */
                 interfaceIcons: {
                     /* icon for adding new nodes */
                     addNode: 'fa-plus-circle',
@@ -97,8 +98,8 @@ angular.module('ioki.treeview', ['RecursionHelper'])
                     scope.treedata.expanded = true;
                 }
 
-                scope.$addNode = function () {
-                    $treeview.addNode();
+                scope.$addNode = function (obj) {
+                    $treeview.addNode(obj);
                 };
 
                 scope.$removeNode = function () {
@@ -160,11 +161,13 @@ angular.module('ioki.treeview', ['RecursionHelper'])
                  * Method allows to use custom function for manage adding process.
                  * It could be useful if developer want to implement pop-up or drop down with possibility
                  * to choose what kind of node user want to add.
+                 *
+                 * @param obj               - Object - additional info / settings that might help with managing adding process
                  */
-                $treeview.addNode = function () {
+                $treeview.addNode = function (obj) {
                     if (options.treesettings.addable) {
                         if (typeof options.treesettings.customMethods.addNode === 'function') {
-                            options.treesettings.customMethods.addNode(scope);
+                            options.treesettings.customMethods.addNode(scope, obj);
                         }
                     }
                 };
@@ -271,7 +274,7 @@ angular.module('ioki.treeview', ['RecursionHelper'])
             return TreeViewFactory;
         };
     })
-    .directive("treeview", ['RecursionHelper', '$treeview', '$templateCache', function (RecursionHelper, $treeview) {
+    .directive("treeview", ['RecursionHelper', '$treeview', '$templateCache', '$compile', function (RecursionHelper, $treeview, $templateCache, $compile) {
         'use strict';
         
         return {
@@ -280,10 +283,27 @@ angular.module('ioki.treeview', ['RecursionHelper'])
                 treedata: '=',
                 treesettings: '='
             },
-            templateUrl: 'templates/ioki-treeview',
             compile: function (element) {
+
                 return RecursionHelper.compile(element, function (scope, element) {
-                    var options = {scope: scope, element: element, treesettings: {}};
+                    /* Linking function in recursive compilation of TreeView */
+
+                    var templateURL, template, compiledTemplate,
+                        options;
+
+                    // Get name of template
+                    templateURL = scope.treesettings.template || 'templates/ioki-treeview';
+
+                    // Prepare template for passing to the element
+                    template = $templateCache.get(templateURL);
+                    compiledTemplate = $compile(template)(scope);
+
+                    element.append(compiledTemplate);
+
+                    /* Prepare scope, element and settings for new treeview element which will be used in recursion process
+                     * of creating whole TreeView
+                     */
+                    options = {scope: scope, element: element, treesettings: {}};
 
                     if (angular.isDefined(scope.treesettings)) {
                         angular.copy(scope.treesettings, options.treesettings);
