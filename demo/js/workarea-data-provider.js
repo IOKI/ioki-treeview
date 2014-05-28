@@ -26,6 +26,7 @@ angular.module('app').factory('treeData', function treeData() {
                         {
                             name: 'Node 1.1.2',
                             type: 'directory',
+                            expanded: false,
                             subnodes: [
                                 {
                                     name: 'Form',
@@ -70,7 +71,19 @@ angular.module('app').factory('treeData', function treeData() {
                             ]
                         },
                         {
-                            name: 'Summary',
+                            name: 'Summary 1',
+                            type: 'activity'
+                        },
+                        {
+                            name: 'Summary 2',
+                            type: 'activity'
+                        },
+                        {
+                            name: 'Summary 3',
+                            type: 'activity'
+                        },
+                        {
+                            name: 'Summary 4',
                             type: 'activity'
                         }
                     ]

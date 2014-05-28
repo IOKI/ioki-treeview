@@ -1,58 +1,117 @@
-/* line 1, ../../src/scss/ioki-treeview.scss */
+/* line 3, ../../src/scss/ioki-treeview.scss */
 treeview {
   display: block;
 }
-/* line 4, ../../src/scss/ioki-treeview.scss */
+/* line 6, ../../src/scss/ioki-treeview.scss */
 treeview > div {
-  padding: 2px 2px 2px 6px;
+  padding: 0px 2px 0px 6px;
   border-radius: 2px;
 }
-/* line 8, ../../src/scss/ioki-treeview.scss */
+/* line 10, ../../src/scss/ioki-treeview.scss */
 treeview > div .expander {
   width: 13px;
   padding-right: 5px;
   cursor: pointer;
   color: #949494;
 }
-/* line 16, ../../src/scss/ioki-treeview.scss */
+/* line 18, ../../src/scss/ioki-treeview.scss */
 treeview > div.expanded .expander {
   color: #000;
 }
-/* line 21, ../../src/scss/ioki-treeview.scss */
+/* line 23, ../../src/scss/ioki-treeview.scss */
 treeview > div .add-node, treeview > div .remove-node {
   margin-right: 15px;
   float: right;
   cursor: pointer;
   line-height: 20px;
 }
-/* line 28, ../../src/scss/ioki-treeview.scss */
+/* line 30, ../../src/scss/ioki-treeview.scss */
 treeview > div .add-node {
   color: forestgreen;
 }
-/* line 32, ../../src/scss/ioki-treeview.scss */
+/* line 34, ../../src/scss/ioki-treeview.scss */
 treeview > div .remove-node {
   color: darkred;
 }
-/* line 36, ../../src/scss/ioki-treeview.scss */
+/* line 38, ../../src/scss/ioki-treeview.scss */
+treeview > div span {
+  display: inline-block;
+  padding: 2px 0px;
+}
+/* line 43, ../../src/scss/ioki-treeview.scss */
 treeview > div:hover, treeview > div.selected {
   color: #fff;
   background: #006da4;
 }
-/* line 40, ../../src/scss/ioki-treeview.scss */
+/* line 47, ../../src/scss/ioki-treeview.scss */
 treeview > div:hover .add-node, treeview > div:hover .remove-node, treeview > div:hover .expander, treeview > div.selected .add-node, treeview > div.selected .remove-node, treeview > div.selected .expander {
   color: #fff;
 }
-/* line 46, ../../src/scss/ioki-treeview.scss */
+/* line 53, ../../src/scss/ioki-treeview.scss */
 treeview > ul {
   padding-left: 10px;
   display: none;
   list-style-type: none;
 }
-/* line 51, ../../src/scss/ioki-treeview.scss */
+/* line 58, ../../src/scss/ioki-treeview.scss */
 treeview > ul.expanded {
   display: block;
 }
-/* line 54, ../../src/scss/ioki-treeview.scss */
+/* line 61, ../../src/scss/ioki-treeview.scss */
 treeview > ul.expanded > div .expander {
   color: #000;
+}
+/* line 66, ../../src/scss/ioki-treeview.scss */
+treeview > ul .separator {
+  display: block;
+  padding: 5px;
+  font-weight: bold;
+  font-size: 12px;
+  font-family: Arial;
+  color: #bcbcbc;
+  text-align: center;
+  text-transform: uppercase;
+  border: 1px dashed #bcbcbc;
+}
+/* line 79, ../../src/scss/ioki-treeview.scss */
+treeview.dragging {
+  cursor: pointer;
+}
+/* line 84, ../../src/scss/ioki-treeview.scss */
+treeview.dragging .dropToDir > div span {
+  background: #ccc;
+}
+/* line 91, ../../src/scss/ioki-treeview.scss */
+treeview.dragged {
+  position: absolute;
+  cursor: pointer;
+  border: solid 1px #66afe9;
+  -webkit-border-radius: 4px;
+  -moz-border-radius: 4px;
+  -ms-border-radius: 4px;
+  -o-border-radius: 4px;
+  border-radius: 4px;
+  -webkit-box-shadow: 0 0 7px rgba(0, 0, 0, 0.35);
+  -moz-box-shadow: 0 0 7px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 0 7px rgba(0, 0, 0, 0.35);
+  opacity: .75;
+}
+/* line 95, ../../src/scss/ioki-treeview.scss */
+treeview.dragged > div {
+  color: #000;
+  background-color: #fff;
+  opacity: .75;
+}
+/* line 109, ../../src/scss/ioki-treeview.scss */
+treeview.ghost {
+  background-color: #fff;
+  border: solid 1px #66afe9;
+  -webkit-border-radius: 4px;
+  -moz-border-radius: 4px;
+  -ms-border-radius: 4px;
+  -o-border-radius: 4px;
+  border-radius: 4px;
+  -webkit-box-shadow: 0 0 7px rgba(0, 0, 0, 0.35);
+  -moz-box-shadow: 0 0 7px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 0 7px rgba(0, 0, 0, 0.35);
 }

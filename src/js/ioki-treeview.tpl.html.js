@@ -10,7 +10,10 @@ angular.module('ioki.treeview').run(['$templateCache', function($templateCache) 
     "       ng-click=\"$toggleNode()\"></i>\n" +
     "\n" +
     "    <!-- node icon -->\n" +
-    "    <i class=\"{{treesettings.iconsBaseClass}} {{treedata | getNodeIcon: treesettings.icons}}\"></i> {{ treedata.name }}\n" +
+    "    <i class=\"{{treesettings.iconsBaseClass}} {{treedata | getNodeIcon: treesettings.icons}}\"></i>\n" +
+    "\n" +
+    "    <!-- node label -->\n" +
+    "    <span>{{ treedata.name }}</span>\n" +
     "\n" +
     "    <!-- remove node icon -->\n" +
     "    <i class=\"remove-node {{treesettings.iconsBaseClass}} {{treesettings.interfaceIcons.removeNode}}\"\n" +

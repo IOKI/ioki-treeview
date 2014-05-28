@@ -1,8 +1,10 @@
+@import 'compass';
+
 treeview {
     display: block;
 
     > div {
-        padding: 2px 2px 2px 6px;
+        padding: 0px 2px 0px 6px;
         border-radius: 2px;
 
         .expander {
@@ -29,15 +31,20 @@ treeview {
             color: forestgreen;
         }
 
-        .remove-node{
+        .remove-node {
             color: darkred;
+        }
+
+        span {
+            display: inline-block;
+            padding: 2px 0px;
         }
 
         &:hover, &.selected {
             color: #fff;
             background: #006da4;
 
-            .add-node, .remove-node, .expander{
+            .add-node, .remove-node, .expander {
                 color: #fff;
             }
         }
@@ -55,5 +62,55 @@ treeview {
                 color: #000;
             }
         }
+
+        .separator {
+            display: block;
+            padding: 5px;
+            font-weight: bold;
+            font-size: 12px;
+            font-family: Arial;
+            color: #bcbcbc;
+            text-align: center;
+            text-transform: uppercase;
+            border: 1px dashed #bcbcbc;
+        }
+    }
+
+    &.dragging {
+        cursor: pointer;
+
+        .dropToDir {
+            > div {
+                span {
+                    background: #ccc;
+                }
+            }
+        }
+    }
+
+    &.dragged {
+        position: absolute;
+        cursor: pointer;
+
+        > div {
+            color: #000;
+            background-color: #fff;
+            opacity: .75;
+        }
+
+        border: solid 1px #66afe9;
+
+        @include border-radius(4px);
+        @include box-shadow(0 0 7px rgba(0, 0, 0, .35));
+
+        opacity: .75;
+    }
+
+    &.ghost {
+        background-color: #fff;
+        border: solid 1px #66afe9;
+
+        @include border-radius(4px);
+        @include box-shadow(0 0 7px rgba(0, 0, 0, .35));
     }
 }
