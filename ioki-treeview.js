@@ -322,9 +322,11 @@ angular.module('ioki.treeview', ['RecursionHelper'])
             return TreeViewFactory;
         };
     })
-    .directive("treeview", ['RecursionHelper', '$treeview', '$templateCache', '$compile', function (RecursionHelper, $treeview, $templateCache, $compile) {
+    .directive("treeview", ['RecursionHelper', '$treeview', '$templateCache', '$compile', '$document', '$window', function (RecursionHelper, $treeview, $templateCache, $compile, $document, $window) {
         'use strict';
-        
+
+        var rootParent;
+
         return {
             restrict: "E",
             scope: {
@@ -333,11 +335,29 @@ angular.module('ioki.treeview', ['RecursionHelper'])
             },
             compile: function (element) {
 
+                // cache root
+                if (typeof rootParent === 'undefined') {
+                    element.attr('treeview-element-type', 'root');
+                    rootParent = element;
+                }
+
                 return RecursionHelper.compile(element, function (scope, element) {
                     /* Linking function in recursive compilation of TreeView */
 
                     var templateURL, template, compiledTemplate,
-                        options;
+                        options,
+                        startX = 0, startY = 0,
+                        elementCopy, parent, dropIndicator, dropToDirEl,
+                        target = {
+                            el:             null,
+                            node:           null,
+                            list:           null,
+                            list_el:        null,
+                            treeview:       null,
+                            scope:          null,
+                            dropToDir:      false,
+                            isDroppable:    false
+                        };
 
                     // Get name of template
                     templateURL = scope.treesettings.template || 'templates/ioki-treeview';
@@ -358,6 +378,256 @@ angular.module('ioki.treeview', ['RecursionHelper'])
                     }
 
                     $treeview(options);
+
+                    /*
+                        Events for Drag & Drop functionality
+                    */
+                    if (element.attr('treeview-element-type') !== 'root') {
+                        element.on('mousedown touchstart', function (event) {
+                            var elementWidth;
+
+                            /*  allow drag if:
+                                    - clicked element does not have any other action bind to it
+                                    - user use left mouse button
+                             */
+                            if (event.target.tagName.toLowerCase() !== 'i' && event.button !== 2 && event.which !== 3) {
+                                // Prevent event delegation
+                                event.preventDefault();
+                                event.stopPropagation();
+
+                                // cache element's parent
+                                parent = element.parent();
+
+                                // create copy of dragged element inside TreeView
+                                elementCopy = element[0].cloneNode(true);
+                                elementCopy.className = 'ghost';
+
+                                // add element's copy to TreeView - original element is dragged
+                                element.after(elementCopy);
+
+                                // calculate position on the screen for element
+
+                                startX = event.pageX - element[0].offsetLeft;
+                                startY = event.pageY - element[0].offsetTop;
+
+                                /*  get element width in case it's not a block with defined width and depends on the parent width
+                                 class 'dragging' set position: absolute; to element so it doesn't inherit width from parent
+                                 */
+                                elementWidth = element[0].offsetWidth;
+
+                                // apply class dragging for whole treeview
+                                rootParent.addClass('dragging');
+
+                                // apply new styles for element
+                                element
+                                    .addClass('dragged')
+                                    .css({
+                                        left:   element[0].offsetLeft   + 'px',
+                                        top:    element[0].offsetTop    + 'px',
+                                        width:  elementWidth            + 'px'
+                                    });
+
+                                // set events for $document
+                                $document
+                                    .on('mousemove touchmove', mousemove)
+                                    .on('mouseup touchend', mouseup);
+                            }
+                        });
+                    }
+
+                    function mousemove(event) {
+                        var x = event.pageX + 10,
+                            y = event.pageY + 10,
+                            dropIndicatorEl = angular.element('<li class="separator">DROP ITEM HERE</li>');
+
+                        // Move element
+                        element.css({
+                            top: y + 'px',
+                            left: x + 'px'
+                        });
+
+                        // Remove old drop indicator - DOM element which points where dragged node will be dropped
+                        if (typeof dropIndicator !== 'undefined') {
+                            dropIndicator.remove();
+                        }
+
+                        // Indicates on which element is cursor
+                        target.el = angular.element($window.document.elementFromPoint(event.pageX, event.pageY));
+
+                        // Find closest parent 'treeview' element for targeted element
+                        target.treeview = target.el;
+                        while (typeof target.treeview[0].tagName !== 'undefined' && target.treeview[0].tagName.toLowerCase() !== 'treeview') {
+                            target.treeview = target.treeview.parent();
+                        }
+
+                        // Find list with subnodes for node (in DOM)
+                        target.list = target.treeview.children().eq(1);
+
+                        // Take actions if User do not try to drop node on ghost element
+                        if (!isInsideGhost(target.treeview)) {
+                            // Allow drop
+                            target.isDroppable = true;
+
+                            // Get scope of subtree (treeview) on which is cursor
+                            target.scope = target.treeview.scope();
+                            /*
+                                Because of recursive nature of treeview node data can be stored:
+                                    - as treeData - for Global Parent for TreeView
+                                    - as subnode - for subnodes in whole TreeView
+                             */
+                            target.node = target.scope.treeData || target.scope.subnode;
+
+                            if (!target.node.subnodes || target.el[0].tagName.toLowerCase() !== 'span') {
+                                // Target is not a directory
+                                target.dropToDir = false;
+
+                                // Go upper than current treeview
+                                target.treeview = target.treeview.parent();
+
+                                // Define list where element should be put
+                                target.list_el = target.treeview;
+
+                                // Find parent treeview
+                                while (typeof target.treeview[0].tagName !== 'undefined' && target.treeview[0].tagName.toLowerCase() !== 'treeview') {
+                                    target.treeview = target.treeview.parent();
+                                }
+
+                                target.list = target.list_el.after();
+                            } else {
+                                // Target is a directory
+                                target.dropToDir = true;
+
+                                // whole subtree (treeview) is a place where dragged element will be pushed
+                                target.list_el = target.treeview;
+
+                                // Remove styles from old drop to directory indicator (DOM element)
+                                if (typeof dropToDirEl !== 'undefined') {
+                                    dropToDirEl.removeClass('dropToDir');
+                                }
+
+                                // Define new drop to directory indicator and apply class
+                                dropToDirEl = target.treeview;
+                                dropToDirEl.addClass('dropToDir');
+                            }
+
+                            // Add Drop Indicator to DOM
+                            target.list.prepend(dropIndicatorEl);
+
+                            // Cache drop indicator for future to remove it
+                            dropIndicator = dropIndicatorEl;
+                        } else {
+                            // Disallow drop
+                            target.isDroppable = false;
+                        }
+
+                        // Remove styles from Drop To Directory Indicator
+                        if (target.dropToDir === false) {
+                            if (typeof dropToDirEl !== 'undefined') {
+                                dropToDirEl.removeClass('dropToDir');
+                            }
+                        }
+                    }
+
+                    /**
+                     * Reset helper variables
+                     * Reset styles
+                     * Remove listeners
+                     */
+                    function mouseup() {
+                        var currentNode,
+                            elementIndexToAdd, elementIndexToRemove,
+                            addBeforeElement,
+                            parentScopeData;
+
+                        // take actions if valid drop happened
+                        if (target.isDroppable) {
+                            // Scope where element should be dropped
+                            target.scope = target.treeview.scope();
+
+                            // Element where element should be dropped
+                            target.node = target.scope.treeData || target.scope.subnode;
+
+                            // Dragged element
+                            currentNode = scope.treedata;
+
+                            // Get Parent scope for element
+                            parentScopeData = scope.$parent.$parent.treedata;
+                            elementIndexToRemove = parentScopeData.subnodes.indexOf(currentNode);
+
+                            if (target.dropToDir) {
+                                elementIndexToAdd = target.node.subnodes.length;
+
+                                // Expand directory if user want to put element to it
+                                if (!target.node.expanded) {
+                                    target.node.expanded = true;
+                                }
+                            } else {
+                                addBeforeElement = target.list_el.children().eq(0).scope().subnode;
+
+                                elementIndexToAdd = target.node.subnodes.indexOf(addBeforeElement);
+                            }
+
+                            target.scope.$apply(function () {
+                                parentScopeData.subnodes.splice(elementIndexToRemove, 1);
+                                target.node.subnodes.splice(elementIndexToAdd,0,currentNode);
+                            });
+                        }
+
+                        // reset positions
+                        startX = startY = 0;
+
+                        // remove ghost
+                        parent[0].removeChild(elementCopy);
+
+                        // remove drop area indicator
+                        if (typeof dropIndicator !== 'undefined') {
+                            dropIndicator.remove();
+                        }
+
+                        // Remove styles from old drop to directory indicator (DOM element)
+                        if (typeof dropToDirEl !== 'undefined') {
+                            dropToDirEl.removeClass('dropToDir');
+                        }
+
+                        // reset droppable
+                        target.isDroppable = false;
+
+                        // remove styles for whole treeview
+                        rootParent.removeClass('dragging');
+
+                        // reset styles for dragged element
+                        element
+                            .removeClass('dragged')
+                            .removeAttr('style');
+
+                        // remove events from $document
+                        $document
+                            .off('mousemove', mousemove)
+                            .off('mouseup', mouseup);
+                    }
+
+                    function isInsideGhost(targetTreeView) {
+                        var target = targetTreeView;
+
+                        if (target.hasClass('ghost')) {
+                            return true;
+                        } else {
+                            // look for ghost
+                            while (typeof target[0] !== 'undefined' && target.attr('treeview-element-type') !== 'root') {
+                                if (typeof target[0].tagName !== 'undefined') {
+                                    if (target[0].tagName.toLowerCase() === 'treeview' && target.hasClass('ghost')) {
+                                        return true;
+                                    }
+                                } else {
+                                    return true;
+                                }
+
+                                target = target.parent();
+                            }
+                        }
+
+                        return false;
+                    }
                 });
             }
         };
@@ -374,7 +644,10 @@ angular.module('ioki.treeview').run(['$templateCache', function($templateCache) 
     "       ng-click=\"$toggleNode()\"></i>\n" +
     "\n" +
     "    <!-- node icon -->\n" +
-    "    <i class=\"{{treesettings.iconsBaseClass}} {{treedata | getNodeIcon: treesettings.icons}}\"></i> {{ treedata.name }}\n" +
+    "    <i class=\"{{treesettings.iconsBaseClass}} {{treedata | getNodeIcon: treesettings.icons}}\"></i>\n" +
+    "\n" +
+    "    <!-- node label -->\n" +
+    "    <span>{{ treedata.name }}</span>\n" +
     "\n" +
     "    <!-- remove node icon -->\n" +
     "    <i class=\"remove-node {{treesettings.iconsBaseClass}} {{treesettings.interfaceIcons.removeNode}}\"\n" +
