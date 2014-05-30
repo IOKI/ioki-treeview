@@ -2,7 +2,7 @@ angular.module('app').factory('treeData', function treeData() {
     'use strict';
 
     return {
-        data: {
+        data: [{
             name: 'Node 1',
             type: 'directory',
             expanded: true,
@@ -89,6 +89,6 @@ angular.module('app').factory('treeData', function treeData() {
                     ]
                 }
             ]
-        }
+        }]
     };
 });

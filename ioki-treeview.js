@@ -327,6 +327,8 @@ angular.module('ioki.treeview', ['RecursionHelper'])
 
         var rootParent;
 
+        console.log('directive rootParent', rootParent);
+
         return {
             restrict: "E",
             scope: {
@@ -339,6 +341,8 @@ angular.module('ioki.treeview', ['RecursionHelper'])
                 if (typeof rootParent === 'undefined') {
                     element.attr('treeview-element-type', 'root');
                     rootParent = element;
+
+                    console.log('iff', rootParent);
                 }
 
                 return RecursionHelper.compile(element, function (scope, element) {
@@ -477,7 +481,7 @@ angular.module('ioki.treeview', ['RecursionHelper'])
                              */
                             target.node = target.scope.treeData || target.scope.subnode;
 
-                            if (!target.node.subnodes || target.el[0].tagName.toLowerCase() !== 'span') {
+                            if (!target.node.subnodes || !target.el.hasClass('node-label')) {
                                 // Target is not a directory
                                 target.dropToDir = false;
 
@@ -500,6 +504,9 @@ angular.module('ioki.treeview', ['RecursionHelper'])
                                 // whole subtree (treeview) is a place where dragged element will be pushed
                                 target.list_el = target.treeview;
 
+                                // add at the end of list
+                                target.list = target.treeview.children().children().eq(-1);
+
                                 // Remove styles from old drop to directory indicator (DOM element)
                                 if (typeof dropToDirEl !== 'undefined') {
                                     dropToDirEl.removeClass('dropToDir');
@@ -511,7 +518,7 @@ angular.module('ioki.treeview', ['RecursionHelper'])
                             }
 
                             // Add Drop Indicator to DOM
-                            target.list.prepend(dropIndicatorEl);
+                            target.list.after(dropIndicatorEl);
 
                             // Cache drop indicator for future to remove it
                             dropIndicator = dropIndicatorEl;
@@ -536,7 +543,7 @@ angular.module('ioki.treeview', ['RecursionHelper'])
                     function mouseup() {
                         var currentNode,
                             elementIndexToAdd, elementIndexToRemove,
-                            addBeforeElement,
+                            addAfterElement,
                             parentScopeData;
 
                         // take actions if valid drop happened
@@ -562,9 +569,14 @@ angular.module('ioki.treeview', ['RecursionHelper'])
                                     target.node.expanded = true;
                                 }
                             } else {
-                                addBeforeElement = target.list_el.children().eq(0).scope().subnode;
+                                addAfterElement = target.list_el.children().eq(0).scope().subnode;
 
-                                elementIndexToAdd = target.node.subnodes.indexOf(addBeforeElement);
+                                console.log('addAfterElement', addAfterElement);
+                                console.log('target.node', target.node, '\n');
+                                console.log('target.node.subnodes', target.node.subnodes, '\n');
+                                console.log('target.scope', target.scope, '\n');
+
+                                elementIndexToAdd = target.node.subnodes.indexOf(addAfterElement) + 1;
                             }
 
                             target.scope.$apply(function () {
@@ -609,7 +621,7 @@ angular.module('ioki.treeview', ['RecursionHelper'])
                     function isInsideGhost(targetTreeView) {
                         var target = targetTreeView;
 
-                        if (target.hasClass('ghost')) {
+                        if (target.hasClass('ghost') || target.attr('treeview-element-type') === 'root') {
                             return true;
                         } else {
                             // look for ghost
@@ -647,7 +659,7 @@ angular.module('ioki.treeview').run(['$templateCache', function($templateCache) 
     "    <i class=\"{{treesettings.iconsBaseClass}} {{treedata | getNodeIcon: treesettings.icons}}\"></i>\n" +
     "\n" +
     "    <!-- node label -->\n" +
-    "    <span>{{ treedata.name }}</span>\n" +
+    "    <span class=\"node-label\">{{ treedata.name }}</span>\n" +
     "\n" +
     "    <!-- remove node icon -->\n" +
     "    <i class=\"remove-node {{treesettings.iconsBaseClass}} {{treesettings.interfaceIcons.removeNode}}\"\n" +

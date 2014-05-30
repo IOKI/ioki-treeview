@@ -2,7 +2,7 @@
 
 angular.module('app').controller('WorkareaController', function ($scope, $modal, treeData, treeAvailableNodes) {
 
-    $scope.treeData = treeData.data;
+    $scope.treeData = treeData.data[0];
     $scope.subnodes = treeAvailableNodes.data;
 
     /**
@@ -49,7 +49,7 @@ angular.module('app').controller('WorkareaController', function ($scope, $modal,
         addable: true,
         removable: true,
         selectable: false,
-        expandAll: false,
+
         iconsBaseClass: 'fa',
         icons: {
             'directory': {

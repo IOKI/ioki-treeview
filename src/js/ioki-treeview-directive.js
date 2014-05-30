@@ -429,7 +429,7 @@ angular.module('ioki.treeview', ['RecursionHelper'])
                              */
                             target.node = target.scope.treeData || target.scope.subnode;
 
-                            if (!target.node.subnodes || target.el[0].tagName.toLowerCase() !== 'span') {
+                            if (!target.node.subnodes || !target.el.hasClass('node-label')) {
                                 // Target is not a directory
                                 target.dropToDir = false;
 
@@ -452,6 +452,9 @@ angular.module('ioki.treeview', ['RecursionHelper'])
                                 // whole subtree (treeview) is a place where dragged element will be pushed
                                 target.list_el = target.treeview;
 
+                                // add at the end of list
+                                target.list = target.treeview.children().children().eq(-1);
+
                                 // Remove styles from old drop to directory indicator (DOM element)
                                 if (typeof dropToDirEl !== 'undefined') {
                                     dropToDirEl.removeClass('dropToDir');
@@ -463,7 +466,7 @@ angular.module('ioki.treeview', ['RecursionHelper'])
                             }
 
                             // Add Drop Indicator to DOM
-                            target.list.prepend(dropIndicatorEl);
+                            target.list.after(dropIndicatorEl);
 
                             // Cache drop indicator for future to remove it
                             dropIndicator = dropIndicatorEl;
@@ -488,7 +491,7 @@ angular.module('ioki.treeview', ['RecursionHelper'])
                     function mouseup() {
                         var currentNode,
                             elementIndexToAdd, elementIndexToRemove,
-                            addBeforeElement,
+                            addAfterElement,
                             parentScopeData;
 
                         // take actions if valid drop happened
@@ -514,9 +517,9 @@ angular.module('ioki.treeview', ['RecursionHelper'])
                                     target.node.expanded = true;
                                 }
                             } else {
-                                addBeforeElement = target.list_el.children().eq(0).scope().subnode;
+                                addAfterElement = target.list_el.children().eq(0).scope().subnode;
 
-                                elementIndexToAdd = target.node.subnodes.indexOf(addBeforeElement);
+                                elementIndexToAdd = target.node.subnodes.indexOf(addAfterElement) + 1;
                             }
 
                             target.scope.$apply(function () {
@@ -561,7 +564,7 @@ angular.module('ioki.treeview', ['RecursionHelper'])
                     function isInsideGhost(targetTreeView) {
                         var target = targetTreeView;
 
-                        if (target.hasClass('ghost')) {
+                        if (target.hasClass('ghost') || target.attr('treeview-element-type') === 'root') {
                             return true;
                         } else {
                             // look for ghost

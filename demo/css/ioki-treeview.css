@@ -34,7 +34,7 @@ treeview > div .remove-node {
   color: darkred;
 }
 /* line 38, ../../src/scss/ioki-treeview.scss */
-treeview > div span {
+treeview > div span.node-label {
   display: inline-block;
   padding: 2px 0px;
 }
@@ -78,7 +78,7 @@ treeview.dragging {
   cursor: pointer;
 }
 /* line 84, ../../src/scss/ioki-treeview.scss */
-treeview.dragging .dropToDir > div span {
+treeview.dragging .dropToDir > div span.node-label {
   background: #ccc;
 }
 /* line 91, ../../src/scss/ioki-treeview.scss */
