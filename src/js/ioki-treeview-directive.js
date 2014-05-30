@@ -342,7 +342,7 @@ angular.module('ioki.treeview', ['RecursionHelper'])
                                     - clicked element does not have any other action bind to it
                                     - user use left mouse button
                              */
-                            if (event.target.tagName.toLowerCase() !== 'i' && event.button !== 2 && event.which !== 3) {
+                            if (event.target.tagName.toLowerCase() !== 'i' && event.target.tagName.toLowerCase() !== 'a' && event.button !== 2 && event.which !== 3) {
                                 // Prevent event delegation
                                 event.preventDefault();
                                 event.stopPropagation();
