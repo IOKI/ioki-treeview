@@ -327,8 +327,6 @@ angular.module('ioki.treeview', ['RecursionHelper'])
 
         var rootParent;
 
-        console.log('directive rootParent', rootParent);
-
         return {
             restrict: "E",
             scope: {
@@ -341,8 +339,6 @@ angular.module('ioki.treeview', ['RecursionHelper'])
                 if (typeof rootParent === 'undefined') {
                     element.attr('treeview-element-type', 'root');
                     rootParent = element;
-
-                    console.log('iff', rootParent);
                 }
 
                 return RecursionHelper.compile(element, function (scope, element) {
@@ -570,11 +566,6 @@ angular.module('ioki.treeview', ['RecursionHelper'])
                                 }
                             } else {
                                 addAfterElement = target.list_el.children().eq(0).scope().subnode;
-
-                                console.log('addAfterElement', addAfterElement);
-                                console.log('target.node', target.node, '\n');
-                                console.log('target.node.subnodes', target.node.subnodes, '\n');
-                                console.log('target.scope', target.scope, '\n');
 
                                 elementIndexToAdd = target.node.subnodes.indexOf(addAfterElement) + 1;
                             }
