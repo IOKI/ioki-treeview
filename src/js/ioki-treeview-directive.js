@@ -46,7 +46,11 @@ angular.module('ioki.treeview', ['RecursionHelper'])
                     /* addNode method */
                     addNode: null,
                     /* removeNode method */
-                    removeNode: null
+                    removeNode: null,
+                    /* method is called when node is dragged */
+                    dragging: null,
+                    /* method is called when node is dropped */
+                    drop: null
                 }
             }
         };
@@ -481,6 +485,10 @@ angular.module('ioki.treeview', ['RecursionHelper'])
                                 dropToDirEl.removeClass('dropToDir');
                             }
                         }
+
+                        if (typeof scope.treesettings.customMethods.dragging === 'function') {
+                            scope.treesettings.customMethods.dragging(rootParent.scope(), scope, target, element);
+                        }
                     }
 
                     /**
@@ -526,6 +534,10 @@ angular.module('ioki.treeview', ['RecursionHelper'])
                                 parentScopeData.subnodes.splice(elementIndexToRemove, 1);
                                 target.node.subnodes.splice(elementIndexToAdd,0,currentNode);
                             });
+                        }
+
+                        if (typeof scope.treesettings.customMethods.dropped === 'function') {
+                            scope.treesettings.customMethods.dropped(rootParent.scope(), scope, target, element);
                         }
 
                         // reset positions

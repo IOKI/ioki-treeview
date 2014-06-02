@@ -41,6 +41,14 @@ angular.module('app').controller('WorkareaController', function ($scope, $modal,
         }, function () {});
     };
 
+/*
+    $scope.dragging = function (rootScope, scope, target, draggedEl) {
+    };
+
+    $scope.dropped = function (rootScope, scope, target, draggedEl) {
+    };
+*/
+
     /**
      * TreeView Settings Object
      * Put your TreeView customization here.
