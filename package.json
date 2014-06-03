@@ -1,6 +1,6 @@
 {
   "name": "ioki-treeview",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "author": "IOKI",
   "description": "TreeView component for AngularJS. Developed by IOKI Team.",
   "dependencies": {},
