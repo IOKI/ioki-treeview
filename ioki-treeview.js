@@ -333,6 +333,7 @@ angular.module('ioki.treeview', ['RecursionHelper'])
 
         return {
             restrict: "E",
+            transclude: true,
             scope: {
                 treedata: '=',
                 treesettings: '='
@@ -342,7 +343,7 @@ angular.module('ioki.treeview', ['RecursionHelper'])
                 // cache root
                 if (typeof rootParent === 'undefined') {
                     element.attr('treeview-element-type', 'root');
-                    rootParent = element;
+                    rootParent = {};
                 }
 
                 return RecursionHelper.compile(element, function (scope, element) {
@@ -399,6 +400,11 @@ angular.module('ioki.treeview', ['RecursionHelper'])
                                 event.preventDefault();
                                 event.stopPropagation();
 
+                                // get root element and cache it
+                                if (typeof rootParent.el === 'undefined') {
+                                    rootParent = getTreeViewParent(element);
+                                }
+
                                 // cache element's parent
                                 parent = element.parent();
 
@@ -420,7 +426,7 @@ angular.module('ioki.treeview', ['RecursionHelper'])
                                 elementWidth = element[0].offsetWidth;
 
                                 // apply class dragging for whole treeview
-                                rootParent.addClass('dragging');
+                                rootParent.el.addClass('dragging');
 
                                 // apply new styles for element
                                 element
@@ -535,7 +541,7 @@ angular.module('ioki.treeview', ['RecursionHelper'])
                         }
 
                         if (typeof scope.treesettings.customMethods.dragging === 'function') {
-                            scope.treesettings.customMethods.dragging(rootParent.scope(), scope, target, element);
+                            scope.treesettings.customMethods.dragging(rootParent, scope, target, element);
                         }
                     }
 
@@ -608,7 +614,7 @@ angular.module('ioki.treeview', ['RecursionHelper'])
                         target.isDroppable = false;
 
                         // remove styles for whole treeview
-                        rootParent.removeClass('dragging');
+                        rootParent.el.removeClass('dragging');
 
                         // reset styles for dragged element
                         element
@@ -642,6 +648,22 @@ angular.module('ioki.treeview', ['RecursionHelper'])
                         }
 
                         return false;
+                    }
+
+                    function getTreeViewParent (el) {
+
+                        if (typeof el !== 'undefined') {
+                            while (typeof el !== 'undefined' && el.attr('treeview-element-type') !== 'root') {
+                                el = el.parent();
+
+                                if (el.attr('treeview-element-type') === 'root') {
+                                    return {
+                                        el: el,
+                                        scope: el.scope()
+                                    };
+                                }
+                            }
+                        }
                     }
                 });
             }

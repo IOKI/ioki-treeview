@@ -2,7 +2,7 @@
 
 angular.module('app').controller('WorkareaController', function ($scope, $modal, treeData, treeAvailableNodes) {
 
-    $scope.treeData = treeData.data[0];
+    $scope.tData = treeData.data;
     $scope.subnodes = treeAvailableNodes.data;
 
     /**
@@ -40,14 +40,13 @@ angular.module('app').controller('WorkareaController', function ($scope, $modal,
             $scope.selected = selectedItem;
         }, function () {});
     };
-
-/*
-    $scope.dragging = function (rootScope, scope, target, draggedEl) {
+    /*
+    $scope.dragging = function (root, scope, target, draggedEl) {
+        console.log('dragging', root, scope, target, draggedEl);
     };
 
-    $scope.dropped = function (rootScope, scope, target, draggedEl) {
-    };
-*/
+    $scope.dropped = function (root, scope, target, draggedEl) {
+    };*/
 
     /**
      * TreeView Settings Object
@@ -75,7 +74,8 @@ angular.module('app').controller('WorkareaController', function ($scope, $modal,
              * Pass custom method for adding nodes in TreeView.
              * Function exists in Workarea Controller.
              */
-            addNode: $scope.addNode
+            addNode: $scope.addNode/*,
+            dragging: $scope.dragging*/
         }
     };
 });
