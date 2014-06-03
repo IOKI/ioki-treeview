@@ -47,6 +47,10 @@ angular.module('ioki.treeview', ['RecursionHelper'])
                     addNode: null,
                     /* removeNode method */
                     removeNode: null,
+                    /* method is called when node is started to drag (fire once) */
+                    dragStart: null,
+                    /* method is called when node is stopped to drag (fire once) */
+                    dragEnd: null,
                     /* method is called when node is dragged */
                     dragging: null,
                     /* method is called when node is dropped */
@@ -393,6 +397,10 @@ angular.module('ioki.treeview', ['RecursionHelper'])
                                 $document
                                     .on('mousemove touchmove', mousemove)
                                     .on('mouseup touchend', mouseup);
+
+                                if (typeof scope.treesettings.customMethods.dragStart === 'function') {
+                                    scope.treesettings.customMethods.dragStart(rootParent, scope, element);
+                                }
                             }
                         });
                     }
@@ -577,6 +585,10 @@ angular.module('ioki.treeview', ['RecursionHelper'])
                         $document
                             .off('mousemove', mousemove)
                             .off('mouseup', mouseup);
+
+                        if (typeof scope.treesettings.customMethods.dragEnd === 'function') {
+                            scope.treesettings.customMethods.dragEnd(rootParent, scope, element);
+                        }
                     }
 
                     function isInsideGhost(targetTreeView) {
