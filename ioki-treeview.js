@@ -330,7 +330,7 @@ angular.module('ioki.treeview', ['RecursionHelper'])
             return TreeViewFactory;
         };
     })
-    .directive("treeview", ['RecursionHelper', '$treeview', '$templateCache', '$compile', '$document', '$window', function (RecursionHelper, $treeview, $templateCache, $compile, $document, $window) {
+    .directive("treeview", ['RecursionHelper', '$treeview', '$templateCache', '$compile', '$document', '$window', '$q', function (RecursionHelper, $treeview, $templateCache, $compile, $document, $window, $q) {
         'use strict';
 
         var rootParent;
@@ -389,15 +389,15 @@ angular.module('ioki.treeview', ['RecursionHelper'])
                     $treeview(options);
 
                     /*
-                        Events for Drag & Drop functionality
-                    */
+                     Events for Drag & Drop functionality
+                     */
                     if (element.attr('treeview-element-type') !== 'root') {
                         element.on('mousedown touchstart', function (event) {
                             var elementWidth;
 
                             /*  allow drag if:
-                                    - clicked element does not have any other action bind to it
-                                    - user use left mouse button
+                             - clicked element does not have any other action bind to it
+                             - user use left mouse button
                              */
                             if (event.target.tagName.toLowerCase() !== 'i' && event.target.tagName.toLowerCase() !== 'a' && event.button !== 2 && event.which !== 3) {
                                 // Prevent event delegation
@@ -470,7 +470,7 @@ angular.module('ioki.treeview', ['RecursionHelper'])
                         }
 
                         // Indicates on which element is cursor
-                        target.el = angular.element($window.document.elementFromPoint(event.pageX, event.pageY));
+                        target.el = angular.element($window.document.elementFromPoint(event.clientX, event.clientY));
 
                         // Find closest parent 'treeview' element for targeted element
                         target.treeview = target.el;
@@ -489,9 +489,9 @@ angular.module('ioki.treeview', ['RecursionHelper'])
                             // Get scope of subtree (treeview) on which is cursor
                             target.scope = target.treeview.scope();
                             /*
-                                Because of recursive nature of treeview node data can be stored:
-                                    - as treeData - for Global Parent for TreeView
-                                    - as subnode - for subnodes in whole TreeView
+                             Because of recursive nature of treeview node data can be stored:
+                             - as treeData - for Global Parent for TreeView
+                             - as subnode - for subnodes in whole TreeView
                              */
                             target.node = target.scope.treeData || target.scope.subnode;
 
@@ -562,7 +562,9 @@ angular.module('ioki.treeview', ['RecursionHelper'])
                         var currentNode,
                             elementIndexToAdd, elementIndexToRemove,
                             addAfterElement,
-                            parentScopeData;
+                            parentScopeData,
+                            deferred = $q.defer(),
+                            promise = deferred.promise;
 
                         // take actions if valid drop happened
                         if (target.isDroppable) {
@@ -592,14 +594,21 @@ angular.module('ioki.treeview', ['RecursionHelper'])
                                 elementIndexToAdd = target.node.subnodes.indexOf(addAfterElement) + 1;
                             }
 
-                            target.scope.$apply(function () {
+                            promise.then(function (index) {
                                 parentScopeData.subnodes.splice(elementIndexToRemove, 1);
-                                target.node.subnodes.splice(elementIndexToAdd,0,currentNode);
-                            });
-                        }
 
-                        if (typeof scope.treesettings.customMethods.dropped === 'function') {
-                            scope.treesettings.customMethods.dropped(rootParent.scope(), scope, target, element);
+                                if (index !== 'undefined') {
+                                    elementIndexToAdd = index;
+                                }
+
+                                target.node.subnodes.splice(elementIndexToAdd, 0, currentNode);
+                            });
+
+                            if (typeof scope.treesettings.customMethods.dragEnd === 'function') {
+                                scope.treesettings.customMethods.dragEnd(rootParent, scope, target, deferred);
+                            } else {
+                                deferred.resolve();
+                            }
                         }
 
                         // reset positions
@@ -633,10 +642,6 @@ angular.module('ioki.treeview', ['RecursionHelper'])
                         $document
                             .off('mousemove', mousemove)
                             .off('mouseup', mouseup);
-
-                        if (typeof scope.treesettings.customMethods.dragEnd === 'function') {
-                            scope.treesettings.customMethods.dragEnd(rootParent, scope, element);
-                        }
                     }
 
                     function isInsideGhost(targetTreeView) {
