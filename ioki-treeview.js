@@ -605,9 +605,13 @@ angular.module('ioki.treeview', ['RecursionHelper'])
                             });
 
                             if (typeof scope.treesettings.customMethods.dragEnd === 'function') {
-                                scope.treesettings.customMethods.dragEnd(rootParent, scope, target, deferred);
+                                scope.treesettings.customMethods.dragEnd(target.isDroppable, rootParent, scope, target, deferred);
                             } else {
                                 deferred.resolve();
+                            }
+                        } else {
+                            if (typeof scope.treesettings.customMethods.dragEnd === 'function') {
+                                scope.treesettings.customMethods.dragEnd(target.isDroppable, rootParent, scope, target, deferred);
                             }
                         }
 
