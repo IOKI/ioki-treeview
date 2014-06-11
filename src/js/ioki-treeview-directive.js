@@ -316,6 +316,7 @@ angular.module('ioki.treeview', ['RecursionHelper'])
                             list_el:        null,
                             treeview:       null,
                             scope:          null,
+                            addAfterEl:     true,
                             dropToDir:      false,
                             isDroppable:    false
                         };
@@ -372,7 +373,6 @@ angular.module('ioki.treeview', ['RecursionHelper'])
                                 element.after(elementCopy);
 
                                 // calculate position on the screen for element
-
                                 startX = event.pageX - element[0].offsetLeft;
                                 startY = event.pageY - element[0].offsetTop;
 
@@ -483,8 +483,18 @@ angular.module('ioki.treeview', ['RecursionHelper'])
                                 dropToDirEl.addClass('dropToDir');
                             }
 
-                            // Add Drop Indicator to DOM
-                            target.list.after(dropIndicatorEl);
+                            /*  Add Drop Indicator to DOM
+                                Calculate if user wants to drop element after or before node he/she is on (target)
+                             */
+                            if (event.clientY > target.list[0].offsetTop + (target.list[0].offsetHeight / 2)) {
+                                // add after current target
+                                target.list.after(dropIndicatorEl);
+                                target.addAfterEl = true;
+                            } else {
+                                // add before current target
+                                target.list.prepend(dropIndicatorEl);
+                                target.addAfterEl = false;
+                            }
 
                             // Cache drop indicator for future to remove it
                             dropIndicator = dropIndicatorEl;
@@ -533,6 +543,7 @@ angular.module('ioki.treeview', ['RecursionHelper'])
                             parentScopeData = scope.$parent.$parent.treedata;
                             elementIndexToRemove = parentScopeData.subnodes.indexOf(currentNode);
 
+                            // Dragged element can be dropped directly to directory (via node label)
                             if (target.dropToDir) {
                                 elementIndexToAdd = target.node.subnodes.length;
 
@@ -543,23 +554,30 @@ angular.module('ioki.treeview', ['RecursionHelper'])
                             } else {
                                 addAfterElement = target.list_el.children().eq(0).scope().subnode;
 
-                                elementIndexToAdd = target.node.subnodes.indexOf(addAfterElement) + 1;
+                                // Calculate new Index for dragged node (it's different for dropping node before or after target)
+                                if (target.addAfterEl) {
+                                    elementIndexToAdd = target.node.subnodes.indexOf(addAfterElement) + 1;
+                                } else {
+                                    elementIndexToAdd = target.node.subnodes.indexOf(addAfterElement);
+                                }
                             }
 
+                            // "Resolve" promise - rearrange nodes
                             promise.then(function (index) {
+                                var newElementIndex = index || 0;
+
                                 parentScopeData.subnodes.splice(elementIndexToRemove, 1);
 
-                                if (index !== 'undefined') {
-                                    elementIndexToAdd = index;
-                                }
-
-                                target.node.subnodes.splice(elementIndexToAdd, 0, currentNode);
+                                target.node.subnodes.splice(newElementIndex, 0, currentNode);
                             });
 
+                            /*  Custom method for DRAG END
+                                If there is no any custom method for Drag End - resolve promise and finalize dropping action
+                             */
                             if (typeof scope.treesettings.customMethods.dragEnd === 'function') {
                                 scope.treesettings.customMethods.dragEnd(target.isDroppable, rootParent, scope, target, deferred);
                             } else {
-                                deferred.resolve();
+                                deferred.resolve(elementIndexToAdd);
                             }
                         } else {
                             if (typeof scope.treesettings.customMethods.dragEnd === 'function') {
