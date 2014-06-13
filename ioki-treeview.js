@@ -499,6 +499,10 @@ angular.module('ioki.treeview', ['RecursionHelper'])
                                 // Target is not a directory
                                 target.dropToDir = false;
 
+                                if (typeof target.node.subnodes !== 'undefined') {
+                                    target.node = target.scope.$parent.treedata;
+                                }
+
                                 // Go upper than current treeview
                                 target.treeview = target.treeview.parent();
 
@@ -511,6 +515,20 @@ angular.module('ioki.treeview', ['RecursionHelper'])
                                 }
 
                                 target.list = target.list_el.after();
+
+                                /*  Add Drop Indicator to DOM
+                                 Calculate if user wants to drop element after or before node he/she is on (target)
+                                 */
+
+                                if (event.clientY > target.list[0].getBoundingClientRect().top + (target.list[0].offsetHeight / 2)) {
+                                    // add after current target
+                                    target.list.after(dropIndicatorEl);
+                                    target.addAfterEl = true;
+                                } else {
+                                    // add before current target
+                                    target.list.prepend(dropIndicatorEl);
+                                    target.addAfterEl = false;
+                                }
                             } else {
                                 // Target is a directory
                                 target.dropToDir = true;
@@ -521,6 +539,9 @@ angular.module('ioki.treeview', ['RecursionHelper'])
                                 // add at the end of list
                                 target.list = target.treeview.children().children().eq(-1);
 
+                                target.list.after(dropIndicatorEl);
+                                target.addAfterEl = true;
+
                                 // Remove styles from old drop to directory indicator (DOM element)
                                 if (typeof dropToDirEl !== 'undefined') {
                                     dropToDirEl.removeClass('dropToDir');
@@ -529,19 +550,6 @@ angular.module('ioki.treeview', ['RecursionHelper'])
                                 // Define new drop to directory indicator and apply class
                                 dropToDirEl = target.treeview;
                                 dropToDirEl.addClass('dropToDir');
-                            }
-
-                            /*  Add Drop Indicator to DOM
-                                Calculate if user wants to drop element after or before node he/she is on (target)
-                             */
-                            if (event.clientY > target.list[0].offsetTop + (target.list[0].offsetHeight / 2)) {
-                                // add after current target
-                                target.list.after(dropIndicatorEl);
-                                target.addAfterEl = true;
-                            } else {
-                                // add before current target
-                                target.list.prepend(dropIndicatorEl);
-                                target.addAfterEl = false;
                             }
 
                             // Cache drop indicator for future to remove it
@@ -620,7 +628,7 @@ angular.module('ioki.treeview', ['RecursionHelper'])
                             });
 
                             /*  Custom method for DRAG END
-                                If there is no any custom method for Drag End - resolve promise and finalize dropping action
+                             If there is no any custom method for Drag End - resolve promise and finalize dropping action
                              */
                             if (typeof scope.treesettings.customMethods.dragEnd === 'function') {
                                 scope.treesettings.customMethods.dragEnd(target.isDroppable, rootParent, scope, target, deferred);
