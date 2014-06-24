@@ -622,9 +622,13 @@ angular.module('ioki.treeview', ['RecursionHelper'])
                             promise.then(function (index) {
                                 var newElementIndex = index || 0;
 
-                                parentScopeData.subnodes.splice(elementIndexToRemove, 1);
-
-                                target.node.subnodes.splice(newElementIndex, 0, currentNode);
+                                if (target.node.subnodes === parentScopeData.subnodes && newElementIndex < elementIndexToRemove) {
+                                    parentScopeData.subnodes.splice(elementIndexToRemove, 1);
+                                    target.node.subnodes.splice(newElementIndex, 0, currentNode);
+                                } else {
+                                    target.node.subnodes.splice(newElementIndex, 0, currentNode);
+                                    parentScopeData.subnodes.splice(elementIndexToRemove, 1);
+                                }
                             });
 
                             /*  Custom method for DRAG END
