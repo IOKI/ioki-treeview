@@ -150,8 +150,9 @@ angular.module('ioki.treeview', ['RecursionHelper'])
                     scope.treedata.$removable = true;
                 }
 
-                if (options.treesettings.expandAll) {
+                if (options.treesettings.expandAll && !scope.treedata.expandAllCalled) {
                     scope.treedata.expanded = true;
+                    scope.treedata.expandAllCalled = true;
                 }
 
                 scope.$addNode = function (obj) {
