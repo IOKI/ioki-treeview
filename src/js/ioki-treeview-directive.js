@@ -286,7 +286,8 @@ angular.module('ioki.treeview', ['RecursionHelper'])
     .directive("treeview", ['RecursionHelper', '$treeview', '$templateCache', '$compile', '$document', '$window', '$q', function (RecursionHelper, $treeview, $templateCache, $compile, $document, $window, $q) {
         'use strict';
 
-        var rootParent;
+        var rootParent,
+            nodes = 0;
 
         return {
             restrict: "E",

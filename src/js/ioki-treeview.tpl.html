@@ -1,27 +1,21 @@
 <div ng-class="{'expanded': treedata.expanded, 'selected': treedata.selected}"
      ng-click="$selectNode()">
     <!-- expander icon -->
-    <i class="expander {{treesettings.iconsBaseClass}}"
-       ng-class="(treedata.subnodes && treesettings.showExpander) ? (treedata.expanded ? treesettings.interfaceIcons.openDir : treesettings.interfaceIcons.closeDir) : 'invisible'"
-       ng-click="$toggleNode()"></i>
+    <i class="expander "></i>
 
     <!-- node icon -->
-    <i class="{{treesettings.iconsBaseClass}} {{treedata | getNodeIcon: treesettings.icons}}"></i>
+    <i class=""></i>
 
     <!-- node label -->
     <span class="node-label">{{ treedata.name }}</span>
 
     <!-- remove node icon -->
-    <i class="remove-node {{treesettings.iconsBaseClass}} {{treesettings.interfaceIcons.removeNode}}"
-       ng-click="$removeNode()"
-       ng-class="{'invisible': !treedata.$removable}"></i>
+    <i class="remove-node "></i>
 
     <!-- add node icon -->
-    <i class="add-node {{treesettings.iconsBaseClass}} {{treesettings.interfaceIcons.addNode}}"
-       ng-click="$addNode()"
-       ng-class="{'invisible': (!treesettings.addable || !treedata.subnodes)}"></i>
+    <i class="add-node "></i>
 </div>
-<ul ng-class="{'expanded': treedata.expanded}">
+<ul ng-class="{'expanded': treedata.expanded}" ng-if="treedata.subnodes">
     <li ng-repeat="subnode in treedata.subnodes track by $index">
         <treeview treedata="subnode" treesettings="treesettings"></treeview>
     </li>
