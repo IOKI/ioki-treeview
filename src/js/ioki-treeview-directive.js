@@ -561,7 +561,7 @@ angular.module('ioki.treeview', ['RecursionHelper'])
                                     target.node.expanded = true;
                                 }
                             } else {
-                                addAfterElement = target.list_el.children().eq(0).scope().subnode;
+                                addAfterElement = target.el.scope().treedata;
 
                                 // Calculate new Index for dragged node (it's different for dropping node before or after target)
                                 if (target.addAfterEl) {
