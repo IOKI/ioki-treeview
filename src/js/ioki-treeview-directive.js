@@ -1,69 +1,72 @@
-angular.module('ioki.treeview', ['RecursionHelper'])
+angular.module('ioki.treeview', [
+        'RecursionHelper',
+        'pasvaz.bindonce'
+    ])
     .provider('$treeview', function () {
         'use strict';
 
         var defaults = this.defaults = {
-            prefixClass: 'treeview-',
-            prefixEvent: 'treeview',
-            treesettings: {
-                template: 'templates/ioki-treeview',
-                /* base class for icons system
-                 * e.g. 'fa' for FontAwesome, 'glyphicons' for Glyphicons etc.
-                 * we use FontAwesome by default
-                 */
-                iconsBaseClass: 'fa',
-                /* beside your own template you can also configure specific icon in the interface */
-                interfaceIcons: {
-                    /* icon for adding new nodes */
-                    addNode: 'fa-plus-circle',
-                    /* icon for removing nodes */
-                    removeNode: 'fa-minus-circle',
-                    /* icon for open directory */
-                    openDir: 'fa-caret-down',
-                    /* icon for close directory */
-                    closeDir: 'fa-caret-right'
-                },
-                /* define if user can expand / collapse nodes */
-                expandable: true,
+                prefixClass: 'treeview-',
+                prefixEvent: 'treeview',
+                treesettings: {
+                    template: 'templates/ioki-treeview',
+                    /* base class for icons system
+                     * e.g. 'fa' for FontAwesome, 'glyphicons' for Glyphicons etc.
+                     * we use FontAwesome by default
+                     */
+                    iconsBaseClass: 'fa',
+                    /* beside your own template you can also configure specific icon in the interface */
+                    interfaceIcons: {
+                        /* icon for adding new nodes */
+                        addNode: 'fa-plus-circle',
+                        /* icon for removing nodes */
+                        removeNode: 'fa-minus-circle',
+                        /* icon for open directory */
+                        openDir: 'fa-caret-down',
+                        /* icon for close directory */
+                        closeDir: 'fa-caret-right'
+                    },
+                    /* define if user can expand / collapse nodes */
+                    expandable: true,
 
-                /* define if all nodes should be expanded on loading the tree */
-                expandAll: true,
+                    /* define if all nodes should be expanded on loading the tree */
+                    expandAll: true,
 
-                /* define if user see expanders */
-                showExpander: true,
+                    /* define if user see expanders */
+                    showExpander: true,
 
-                /* define if user can remove nodes */
-                removable: false,
+                    /* define if user can remove nodes */
+                    removable: false,
 
-                /* define if user can add nodes */
-                addable: true,
+                    /* define if user can add nodes */
+                    addable: true,
 
-                /* define if user can select node */
-                selectable: false,
+                    /* define if user can select node */
+                    selectable: false,
 
-                /* treeview offers custom methods via controller's scope */
-                customMethods: {
-                    /* addNode method */
-                    addNode: null,
-                    /* removeNode method */
-                    removeNode: null,
-                    /* method is called when node is started to drag (fire once) */
-                    dragStart: null,
-                    /* method is called when node is stopped to drag (fire once) */
-                    dragEnd: null,
-                    /* method is called when node is dragged */
-                    dragging: null,
-                    /* method is called when node is dropped */
-                    drop: null
+                    /* treeview offers custom methods via controller's scope */
+                    customMethods: {
+                        /* addNode method */
+                        addNode: null,
+                        /* removeNode method */
+                        removeNode: null,
+                        /* method is called when node is started to drag (fire once) */
+                        dragStart: null,
+                        /* method is called when node is stopped to drag (fire once) */
+                        dragEnd: null,
+                        /* method is called when node is dragged */
+                        dragging: null,
+                        /* method is called when node is dropped */
+                        drop: null
+                    }
                 }
-            }
-        };
+            },
+            options = {};
 
         this.$get = function () {
 
             function TreeViewFactory (config) {
-                var $treeview = {},
-                    options, scope,
+                var $treeview = {}, scope,
                     prop;
 
                 options = $treeview.$options = angular.extend({}, defaults, config);
@@ -287,7 +290,7 @@ angular.module('ioki.treeview', ['RecursionHelper'])
         'use strict';
 
         var rootParent,
-            nodes = 0;
+            settings = {};
 
         return {
             restrict: "E",
@@ -323,6 +326,14 @@ angular.module('ioki.treeview', ['RecursionHelper'])
                             isDroppable:    false
                         };
 
+                    if (typeof scope.treesettings !== 'undefined') {
+                        angular.copy(scope.treesettings, settings);
+                    } else {
+                        scope.treesettings = settings;
+                    }
+
+                    scope.$watch('treesettings', function() {});
+
                     // Get name of template
                     templateURL = scope.treesettings.template || 'templates/ioki-treeview';
 
@@ -335,11 +346,7 @@ angular.module('ioki.treeview', ['RecursionHelper'])
                     /* Prepare scope, element and settings for new treeview element which will be used in recursion process
                      * of creating whole TreeView
                      */
-                    options = {scope: scope, element: element, treesettings: {}};
-
-                    if (angular.isDefined(scope.treesettings)) {
-                        angular.copy(scope.treesettings, options.treesettings);
-                    }
+                    options = {scope: scope, element: element, treesettings: scope.treesettings};
 
                     $treeview(options);
 
@@ -405,6 +412,10 @@ angular.module('ioki.treeview', ['RecursionHelper'])
                                 }
                             }
                         });
+                    } else {
+                        if (options.treesettings.showExpander)  { element.addClass('show-expander');    }
+                        if (!options.treesettings.removable)    { element.addClass('unremovable');      }
+                        if (!options.treesettings.addable)      { element.addClass('unaddable');        }
                     }
 
                     function mousemove(event) {

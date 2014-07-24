@@ -3,36 +3,113 @@
 treeview {
     display: block;
 
+    /* EXPANDER START */
+    .expander {
+        visibility: hidden;
+        width: 13px;
+        padding-right: 5px;
+        cursor: pointer;
+        color: #949494;
+
+        &:before {
+            content: "\f0da";       // fa-caret-right
+        }
+    }
+
+    &.show-expander {
+        .expander {
+            visibility: visible;
+        }
+    }
+    /* EXPANDER END */
+
+    /* REMOVE AND ADD NODE START */
+    .add-node, .remove-node {
+        margin-right: 15px;
+        float: right;
+        cursor: pointer;
+        line-height: 20px;
+    }
+
+    .add-node {
+        visibility: hidden;
+        color: forestgreen;
+        &:before {
+            content: "\f055";       // fa-plus-circle
+        }
+    }
+
+    .remove-node {
+        color: darkred;
+        &:before {
+            content: "\f056";       // fa-minus-circle
+        }
+    }
+
+    &.unremovable,  {
+        .remove-node {
+            visibility: hidden;
+        }
+    }
+
+    &.unaddable {
+        .add-node {
+            visibility: hidden;
+        }
+    }
+
+    &[treeview-element-type="root"] > div > .remove-node  {
+        visibility: hidden;
+    }
+    /* REMOVE AND ADD NODE END */
+
     > div {
         padding: 0px 2px 0px 6px;
         border-radius: 2px;
 
-        .expander {
-            width: 13px;
-            padding-right: 5px;
-            cursor: pointer;
-            color: #949494;
-        }
-
         &.expanded {
             .expander {
-                color: #000;
+                visibility: hidden;
+            }
+
+            &+ul {
+                display: block;
+
+                > div .expander {
+                    color: #000;
+                }
             }
         }
 
-        .add-node, .remove-node {
-            margin-right: 15px;
-            float: right;
-            cursor: pointer;
-            line-height: 20px;
+        &.dir.expanded {
+            .expander {
+                visibility: visible;
+                color: #000;
+
+                &:before {
+                    content: "\f0d7";       // fa-caret-down
+                }
+            }
         }
 
-        .add-node {
-            color: forestgreen;
+        .node-icon:before {
+            content: "\f016";           // .fa-file-o
         }
 
-        .remove-node {
-            color: darkred;
+        &.dir {
+            .add-node {
+                visibility: visible;
+            }
+
+            .node-icon:before {
+                content: "\f114";       // .fa-folder-o
+            }
+
+            &.expanded {
+                .node-icon:before {
+                    content: "\f115";   // .fa-folder-open-o
+                }
+            }
         }
 
         span.node-label {
@@ -54,14 +131,6 @@ treeview {
         padding-left: 10px;
         display: none;
         list-style-type: none;
-
-        &.expanded {
-            display: block;
-
-            > div .expander {
-                color: #000;
-            }
-        }
 
         .separator {
             display: block;
