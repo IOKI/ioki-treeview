@@ -5,28 +5,28 @@
 
     <!-- expander icon -->
     <i class="expander"
-       bo-class="treesettings.iconsBaseClass"
+       bo-class="settings.iconsBaseClass"
        ng-click="$toggleNode()"></i>
 
     <!-- node icon -->
     <i class="node-icon"
-       bo-class="treesettings.iconsBaseClass"></i>
+       bo-class="settings.iconsBaseClass"></i>
 
     <!-- node label -->
     <span class="node-label" bo-text="treedata.name"></span>
 
     <!-- remove node icon -->
     <i class="remove-node"
-       bo-class="treesettings.iconsBaseClass"
+       bo-class="settings.iconsBaseClass"
        ng-click="$removeNode()"></i>
 
     <!-- add node icon -->
     <i class="add-node"
-       bo-class="treesettings.iconsBaseClass"
+       bo-class="settings.iconsBaseClass"
        ng-click="$addNode()"></i>
 </div>
 <ul ng-show="treedata.subnodes">
     <li ng-repeat="subnode in treedata.subnodes track by $index">
-        <treeview treedata="subnode" treesettings="treesettings"></treeview>
+        <treeview treedata="subnode"></treeview>
     </li>
 </ul>

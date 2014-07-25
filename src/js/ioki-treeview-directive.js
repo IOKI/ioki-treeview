@@ -77,8 +77,8 @@ angular.module('ioki.treeview', [
                  */
                 for (prop in defaults.treesettings) {
                     if (defaults.treesettings.hasOwnProperty(prop)) {
-                        if (typeof config.treesettings[prop] === 'undefined') {
-                            options.treesettings[prop] = defaults.treesettings[prop];
+                        if (typeof config.settings[prop] === 'undefined') {
+                            options.settings[prop] = defaults.treesettings[prop];
                         }
                     }
                 }
@@ -86,26 +86,26 @@ angular.module('ioki.treeview', [
                 /*
                  copy defaults interface icons if they are not defined in specific options for instance
                  */
-                if (typeof config.treesettings.interfaceIcons !== 'undefined') {
+                if (typeof config.settings.interfaceIcons !== 'undefined') {
                     for (prop in defaults.treesettings.interfaceIcons) {
                         if (defaults.treesettings.interfaceIcons.hasOwnProperty(prop)) {
-                            if (typeof config.treesettings.interfaceIcons[prop] === 'undefined') {
-                                options.treesettings.interfaceIcons[prop] = defaults.treesettings.interfaceIcons[prop];
+                            if (typeof config.settings.interfaceIcons[prop] === 'undefined') {
+                                options.settings.interfaceIcons[prop] = defaults.treesettings.interfaceIcons[prop];
                             }
                         }
                     }
                 }
 
                 scope = $treeview.$scope = options.scope;
-                scope.treesettings = options.treesettings;
+                scope.settings = options.settings;
 
-                if (typeof scope.$parent.$parent.treedata === 'undefined' || !options.treesettings.removable) {
+                if (typeof scope.$parent.$parent.treedata === 'undefined' || !options.settings.removable) {
                     scope.treedata.$removable = false;
                 } else {
                     scope.treedata.$removable = true;
                 }
 
-                if (options.treesettings.expandAll && !scope.treedata.expandAllCalled) {
+                if (options.settings.expandAll && !scope.treedata.expandAllCalled) {
                     scope.treedata.expanded = true;
                     scope.treedata.expandAllCalled = true;
                 }
@@ -134,7 +134,7 @@ angular.module('ioki.treeview', [
                  * This method change state "expanded" in current node for opposite state
                  */
                 $treeview.toggleNode = function () {
-                    if (options.treesettings.expandable) {
+                    if (options.settings.expandable) {
                         scope.treedata.expanded = !scope.treedata.expanded;
                     }
                 };
@@ -177,9 +177,9 @@ angular.module('ioki.treeview', [
                  * @param obj               - Object - additional info / settings that might help with managing adding process
                  */
                 $treeview.addNode = function (obj) {
-                    if (options.treesettings.addable) {
-                        if (typeof options.treesettings.customMethods.addNode === 'function') {
-                            options.treesettings.customMethods.addNode(scope, obj);
+                    if (options.settings.addable) {
+                        if (typeof options.settings.customMethods.addNode === 'function') {
+                            options.settings.customMethods.addNode(scope, obj);
                         }
                     }
                 };
@@ -196,9 +196,9 @@ angular.module('ioki.treeview', [
                     var node = scope.treedata,
                         parent, subnodesArray, index;
 
-                    if (options.treesettings.removable) {
-                        if (typeof options.treesettings.customMethods.removeNode === 'function') {
-                            options.treesettings.customMethods.removeNode(scope);
+                    if (options.settings.removable) {
+                        if (typeof options.settings.customMethods.removeNode === 'function') {
+                            options.settings.customMethods.removeNode(scope);
                         } else {
                             parent = scope.$parent.$parent.treedata;
 
@@ -297,7 +297,7 @@ angular.module('ioki.treeview', [
             transclude: true,
             scope: {
                 treedata: '=',
-                treesettings: '='
+                treesettings: '=?'
             },
             compile: function (element) {
 
@@ -327,15 +327,18 @@ angular.module('ioki.treeview', [
                         };
 
                     if (typeof scope.treesettings !== 'undefined') {
+//                        console.log('1');
                         angular.copy(scope.treesettings, settings);
+                        scope.settings = settings;
                     } else {
-                        scope.treesettings = settings;
+//                        console.log('2');
+                        scope.settings = settings;
                     }
 
-                    scope.$watch('treesettings', function() {});
+//                    console.log('scope', scope);
 
                     // Get name of template
-                    templateURL = scope.treesettings.template || 'templates/ioki-treeview';
+                    templateURL = scope.settings.template || 'templates/ioki-treeview';
 
                     // Prepare template for passing to the element
                     template = $templateCache.get(templateURL);
@@ -346,7 +349,7 @@ angular.module('ioki.treeview', [
                     /* Prepare scope, element and settings for new treeview element which will be used in recursion process
                      * of creating whole TreeView
                      */
-                    options = {scope: scope, element: element, treesettings: scope.treesettings};
+                    options = {scope: scope, element: element, settings: scope.settings};
 
                     $treeview(options);
 
@@ -407,15 +410,15 @@ angular.module('ioki.treeview', [
                                     .on('mousemove touchmove', mousemove)
                                     .on('mouseup touchend', mouseup);
 
-                                if (typeof scope.treesettings.customMethods.dragStart === 'function') {
-                                    scope.treesettings.customMethods.dragStart(rootParent, scope, element);
+                                if (typeof scope.settings.customMethods.dragStart === 'function') {
+                                    scope.settings.customMethods.dragStart(rootParent, scope, element);
                                 }
                             }
                         });
                     } else {
-                        if (options.treesettings.showExpander)  { element.addClass('show-expander');    }
-                        if (!options.treesettings.removable)    { element.addClass('unremovable');      }
-                        if (!options.treesettings.addable)      { element.addClass('unaddable');        }
+                        if (options.settings.showExpander)  { element.addClass('show-expander');    }
+                        if (!options.settings.removable)    { element.addClass('unremovable');      }
+                        if (!options.settings.addable)      { element.addClass('unaddable');        }
                     }
 
                     function mousemove(event) {
@@ -531,8 +534,8 @@ angular.module('ioki.treeview', [
                             }
                         }
 
-                        if (typeof scope.treesettings.customMethods.dragging === 'function') {
-                            scope.treesettings.customMethods.dragging(rootParent, scope, target, element);
+                        if (typeof scope.settings.customMethods.dragging === 'function') {
+                            scope.settings.customMethods.dragging(rootParent, scope, target, element);
                         }
                     }
 
@@ -599,14 +602,14 @@ angular.module('ioki.treeview', [
                             /*  Custom method for DRAG END
                              If there is no any custom method for Drag End - resolve promise and finalize dropping action
                              */
-                            if (typeof scope.treesettings.customMethods.dragEnd === 'function') {
-                                scope.treesettings.customMethods.dragEnd(target.isDroppable, rootParent, scope, target, deferred);
+                            if (typeof scope.settings.customMethods.dragEnd === 'function') {
+                                scope.settings.customMethods.dragEnd(target.isDroppable, rootParent, scope, target, deferred);
                             } else {
                                 deferred.resolve(elementIndexToAdd);
                             }
                         } else {
-                            if (typeof scope.treesettings.customMethods.dragEnd === 'function') {
-                                scope.treesettings.customMethods.dragEnd(target.isDroppable, rootParent, scope, target, deferred);
+                            if (typeof scope.settings.customMethods.dragEnd === 'function') {
+                                scope.settings.customMethods.dragEnd(target.isDroppable, rootParent, scope, target, deferred);
                             }
                         }
 
