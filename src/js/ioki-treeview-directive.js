@@ -327,15 +327,11 @@ angular.module('ioki.treeview', [
                         };
 
                     if (typeof scope.treesettings !== 'undefined') {
-//                        console.log('1');
                         angular.copy(scope.treesettings, settings);
                         scope.settings = settings;
                     } else {
-//                        console.log('2');
                         scope.settings = settings;
                     }
-
-//                    console.log('scope', scope);
 
                     // Get name of template
                     templateURL = scope.settings.template || 'templates/ioki-treeview';
