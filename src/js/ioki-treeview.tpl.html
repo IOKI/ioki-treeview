@@ -1,6 +1,5 @@
 <div bindonce
-     bo-class="{'dir': treedata.subnodes}"
-     ng-class="{'expanded': treedata.expanded, 'selected': treedata.selected}"
+     ng-class="{'expanded': treedata.expanded, 'selected': treedata.selected, 'dir': treedata.subnodes}"
      ng-click="$selectNode()">
 
     <!-- expander icon -->
@@ -13,7 +12,7 @@
        bo-class="settings.iconsBaseClass"></i>
 
     <!-- node label -->
-    <span class="node-label" bo-text="treedata.name"></span>
+    <span class="node-label" ng-bind="treedata.name"></span>
 
     <!-- remove node icon -->
     <i class="remove-node"
@@ -25,7 +24,7 @@
        bo-class="settings.iconsBaseClass"
        ng-click="$addNode()"></i>
 </div>
-<ul ng-show="treedata.subnodes">
+<ul ng-if="treedata.subnodes && treedata.expanded">
     <li ng-repeat="subnode in treedata.subnodes track by $index">
         <treeview treedata="subnode"></treeview>
     </li>

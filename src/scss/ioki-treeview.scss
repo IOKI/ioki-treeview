@@ -17,8 +17,10 @@ treeview {
     }
 
     &.show-expander {
-        .expander {
-            visibility: visible;
+        .dir {
+            .expander {
+                visibility: visible;
+            }
         }
     }
     /* EXPANDER END */
@@ -67,31 +69,6 @@ treeview {
         padding: 0px 2px 0px 6px;
         border-radius: 2px;
 
-        &.expanded {
-            .expander {
-                visibility: hidden;
-            }
-
-            &+ul {
-                display: block;
-
-                > div .expander {
-                    color: #000;
-                }
-            }
-        }
-
-        &.dir.expanded {
-            .expander {
-                visibility: visible;
-                color: #000;
-
-                &:before {
-                    content: "\f0d7";       // fa-caret-down
-                }
-            }
-        }
-
         .node-icon:before {
             content: "\f016";           // .fa-file-o
         }
@@ -108,6 +85,23 @@ treeview {
             &.expanded {
                 .node-icon:before {
                     content: "\f115";   // .fa-folder-open-o
+                }
+
+                .expander {
+                    visibility: visible;
+                    color: #000;
+
+                    &:before {
+                        content: "\f0d7";       // fa-caret-down
+                    }
+                }
+
+                &+ul {
+                    display: block;
+
+                    > div .expander {
+                        color: #000;
+                    }
                 }
             }
         }
