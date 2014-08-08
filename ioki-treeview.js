@@ -57,23 +57,15 @@ angular.module('ioki.treeview', [
                 prefixClass: 'treeview-',
                 prefixEvent: 'treeview',
                 treesettings: {
+                    /* template URL */
                     template: 'templates/ioki-treeview',
+
                     /* base class for icons system
                      * e.g. 'fa' for FontAwesome, 'glyphicons' for Glyphicons etc.
                      * we use FontAwesome by default
                      */
                     iconsBaseClass: 'fa',
-                    /* beside your own template you can also configure specific icon in the interface */
-                    interfaceIcons: {
-                        /* icon for adding new nodes */
-                        addNode: 'fa-plus-circle',
-                        /* icon for removing nodes */
-                        removeNode: 'fa-minus-circle',
-                        /* icon for open directory */
-                        openDir: 'fa-caret-down',
-                        /* icon for close directory */
-                        closeDir: 'fa-caret-right'
-                    },
+
                     /* define if user can expand / collapse nodes */
                     expandable: true,
 
@@ -95,6 +87,9 @@ angular.module('ioki.treeview', [
                     /* define if user can select node */
                     selectable: false,
 
+                    /* define if root node should be selected on load */
+                    rootSelected: false,
+
                     /* treeview offers custom methods via controller's scope */
                     customMethods: {
                         /* addNode method */
@@ -114,11 +109,52 @@ angular.module('ioki.treeview', [
             },
             options = {};
 
-        this.$get = function () {
+        this.$get = function ($rootScope) {
 
             function TreeViewFactory (config) {
                 var $treeview = {}, scope,
                     prop;
+
+                function _isRootNode (scope) {
+                    return typeof scope.$parent.$parent.treedata === 'undefined';
+                }
+
+                /**
+                 * _Private Method isNodeRemovable
+                 *
+                 * Is node removable is determine by global settings (options.settings.removable)
+                 * User also can not remove Parent Node for whole TreeView
+                 *
+                 * @param scope             - Object    - scope of the node
+                 * @returns {boolean}       - Boolean   - returns true if node is removable
+                 */
+                function _isNodeRemovable (scope) {
+                    return !(_isRootNode(scope) || !options.settings.removable);
+                }
+
+                /**
+                 * _Private Method configureScopeVars
+                 *
+                 * Method is configuring properties of node in scope.
+                 * Values depends on options provided by developer.
+                 *
+                 * @param scope             - Object    - scope of node
+                 * @param options           - Object    - options provided by developer
+                 * @private
+                 */
+                function _configureScopeVars(scope, options) {
+                    scope.treedata.$removable = _isNodeRemovable(scope);
+
+                    if (options.settings.expandAll && !scope.treedata.expandAllCalled) {
+                        scope.treedata.expanded = true;
+                        scope.treedata.expandAllCalled = true;
+                    }
+
+                    if (options.settings.rootSelected && _isRootNode(scope)){
+                        scope.treedata.selected = true;
+                        $rootScope.$broadcast('treeview-selected', scope.treedata);
+                    }
+                }
 
                 options = $treeview.$options = angular.extend({}, defaults, config);
 
@@ -134,32 +170,14 @@ angular.module('ioki.treeview', [
                     }
                 }
 
-                /*
-                 copy defaults interface icons if they are not defined in specific options for instance
-                 */
-                if (typeof config.settings.interfaceIcons !== 'undefined') {
-                    for (prop in defaults.treesettings.interfaceIcons) {
-                        if (defaults.treesettings.interfaceIcons.hasOwnProperty(prop)) {
-                            if (typeof config.settings.interfaceIcons[prop] === 'undefined') {
-                                options.settings.interfaceIcons[prop] = defaults.treesettings.interfaceIcons[prop];
-                            }
-                        }
-                    }
-                }
-
                 scope = $treeview.$scope = options.scope;
                 scope.settings = options.settings;
 
-                if (typeof scope.$parent.$parent.treedata === 'undefined' || !options.settings.removable) {
-                    scope.treedata.$removable = false;
-                } else {
-                    scope.treedata.$removable = true;
-                }
+                _configureScopeVars(scope, options);
 
-                if (options.settings.expandAll && !scope.treedata.expandAllCalled) {
-                    scope.treedata.expanded = true;
-                    scope.treedata.expandAllCalled = true;
-                }
+                /**
+                 * INTERFACE for TreeView available in Controller's scope
+                 */
 
                 scope.$addNode = function (obj) {
                     $treeview.addNode(obj);
@@ -201,7 +219,7 @@ angular.module('ioki.treeview', [
                 $treeview.selectNode = function () {
                     var state;
 
-                    if (options.treesettings.selectable) {
+                    if (options.settings.selectable) {
                         // save actual state
                         state = scope.treedata.selected;
 
@@ -210,6 +228,12 @@ angular.module('ioki.treeview', [
 
                         // change state of clicked element on opposite state
                         scope.treedata.selected = !state;
+
+                        if (scope.treedata.selected) {
+                            $rootScope.$broadcast('treeview-selected', scope.treedata);
+                        } else {
+                            $rootScope.$broadcast('treeview-unselected', scope.treedata);
+                        }
                     }
                 };
 
@@ -365,6 +389,7 @@ angular.module('ioki.treeview', [
                         options,
                         startX = 0, startY = 0,
                         elementCopy, parent, dropIndicator, dropToDirEl,
+                        isMoving = false, firstMove = true,
                         target = {
                             el:             null,
                             node:           null,
@@ -379,10 +404,9 @@ angular.module('ioki.treeview', [
 
                     if (typeof scope.treesettings !== 'undefined') {
                         angular.copy(scope.treesettings, settings);
-                        scope.settings = settings;
-                    } else {
-                        scope.settings = settings;
                     }
+
+                    scope.settings = settings;
 
                     // Expand to given Level
                     if (angular.isNumber(settings.expandToLevel)) {
@@ -423,8 +447,6 @@ angular.module('ioki.treeview', [
                     }
 
                     function mousedown (event) {
-                        var elementWidth;
-
                         /*  allow drag if:
                          - clicked element does not have any other action bind to it
                          - user use left mouse button
@@ -439,6 +461,31 @@ angular.module('ioki.treeview', [
                                 rootParent = getTreeViewParent(element);
                             }
 
+                            // calculate position on the screen for element
+                            startX = event.pageX - element[0].offsetLeft;
+                            startY = event.pageY - element[0].offsetTop;
+
+                            // set events for $document
+                            $document
+                                .on('mousemove touchmove', mousemove)
+                                .on('mouseup touchend', mouseup);
+
+                            if (typeof scope.settings.customMethods.dragStart === 'function') {
+                                scope.settings.customMethods.dragStart(rootParent, scope, element);
+                            }
+                        }
+
+                        isMoving = false;
+                    }
+
+                    function mousemove(event) {
+                        var elementWidth,
+                            x = event.pageX + 10,
+                            y = event.pageY + 10;
+
+                        isMoving = true;
+
+                        if (firstMove) {
                             // cache element's parent
                             parent = element.parent();
 
@@ -448,10 +495,6 @@ angular.module('ioki.treeview', [
 
                             // add element's copy to TreeView - original element is dragged
                             element.after(elementCopy);
-
-                            // calculate position on the screen for element
-                            startX = event.pageX - element[0].offsetLeft;
-                            startY = event.pageY - element[0].offsetTop;
 
                             /*  get element width in case it's not a block with defined width and depends on the parent width
                              class 'dragging' set position: absolute; to element so it doesn't inherit width from parent
@@ -470,20 +513,8 @@ angular.module('ioki.treeview', [
                                     width:  elementWidth            + 'px'
                                 });
 
-                            // set events for $document
-                            $document
-                                .on('mousemove touchmove', mousemove)
-                                .on('mouseup touchend', mouseup);
-
-                            if (typeof scope.settings.customMethods.dragStart === 'function') {
-                                scope.settings.customMethods.dragStart(rootParent, scope, element);
-                            }
+                            firstMove = false;
                         }
-                    }
-
-                    function mousemove(event) {
-                        var x = event.pageX + 10,
-                            y = event.pageY + 10;
 
                         // Move element
                         element.css({
@@ -611,100 +642,104 @@ angular.module('ioki.treeview', [
                             deferred = $q.defer(),
                             promise = deferred.promise;
 
-                        // take actions if valid drop happened
-                        if (target.isDroppable) {
-                            // Scope where element should be dropped
-                            target.scope = target.treeview.scope();
+                        if (isMoving) {
+                            // take actions if valid drop happened
+                            if (target.isDroppable) {
+                                // Scope where element should be dropped
+                                target.scope = target.treeview.scope();
 
-                            // Element where element should be dropped
-                            target.node = target.scope.treeData || target.scope.subnode;
+                                // Element where element should be dropped
+                                target.node = target.scope.treeData || target.scope.subnode;
 
-                            // Dragged element
-                            currentNode = scope.treedata;
+                                // Dragged element
+                                currentNode = scope.treedata;
 
-                            // Get Parent scope for element
-                            parentScopeData = scope.$parent.$parent.treedata;
-                            elementIndexToRemove = parentScopeData.subnodes.indexOf(currentNode);
+                                // Get Parent scope for element
+                                parentScopeData = scope.$parent.$parent.treedata;
+                                elementIndexToRemove = parentScopeData.subnodes.indexOf(currentNode);
 
-                            // Dragged element can be dropped directly to directory (via node label)
-                            if (target.dropToDir) {
-                                elementIndexToAdd = target.node.subnodes.length;
+                                // Dragged element can be dropped directly to directory (via node label)
+                                if (target.dropToDir) {
+                                    elementIndexToAdd = target.node.subnodes.length;
 
-                                // Expand directory if user want to put element to it
-                                if (!target.node.expanded) {
-                                    target.node.expanded = true;
+                                    // Expand directory if user want to put element to it
+                                    if (!target.node.expanded) {
+                                        target.node.expanded = true;
+                                    }
+                                } else {
+                                    addAfterElement = target.el.scope().treedata;
+
+                                    // Calculate new Index for dragged node (it's different for dropping node before or after target)
+                                    if (target.addAfterEl) {
+                                        elementIndexToAdd = target.node.subnodes.indexOf(addAfterElement) + 1;
+                                    } else {
+                                        elementIndexToAdd = target.node.subnodes.indexOf(addAfterElement);
+                                    }
+                                }
+
+                                // "Resolve" promise - rearrange nodes
+                                promise.then(function (index) {
+                                    var newElementIndex = index || 0;
+
+                                    if (target.node.subnodes === parentScopeData.subnodes && newElementIndex < elementIndexToRemove) {
+                                        parentScopeData.subnodes.splice(elementIndexToRemove, 1);
+                                        target.node.subnodes.splice(newElementIndex, 0, currentNode);
+                                    } else {
+                                        target.node.subnodes.splice(newElementIndex, 0, currentNode);
+                                        parentScopeData.subnodes.splice(elementIndexToRemove, 1);
+                                    }
+                                });
+
+                                /*  Custom method for DRAG END
+                                 If there is no any custom method for Drag End - resolve promise and finalize dropping action
+                                 */
+                                if (typeof scope.settings.customMethods.dragEnd === 'function') {
+                                    scope.settings.customMethods.dragEnd(target.isDroppable, rootParent, scope, target, deferred);
+                                } else {
+                                    deferred.resolve(elementIndexToAdd);
                                 }
                             } else {
-                                addAfterElement = target.el.scope().treedata;
-
-                                // Calculate new Index for dragged node (it's different for dropping node before or after target)
-                                if (target.addAfterEl) {
-                                    elementIndexToAdd = target.node.subnodes.indexOf(addAfterElement) + 1;
-                                } else {
-                                    elementIndexToAdd = target.node.subnodes.indexOf(addAfterElement);
+                                if (typeof scope.settings.customMethods.dragEnd === 'function') {
+                                    scope.settings.customMethods.dragEnd(target.isDroppable, rootParent, scope, target, deferred);
                                 }
                             }
 
-                            // "Resolve" promise - rearrange nodes
-                            promise.then(function (index) {
-                                var newElementIndex = index || 0;
+                            // reset positions
+                            startX = startY = 0;
 
-                                if (target.node.subnodes === parentScopeData.subnodes && newElementIndex < elementIndexToRemove) {
-                                    parentScopeData.subnodes.splice(elementIndexToRemove, 1);
-                                    target.node.subnodes.splice(newElementIndex, 0, currentNode);
-                                } else {
-                                    target.node.subnodes.splice(newElementIndex, 0, currentNode);
-                                    parentScopeData.subnodes.splice(elementIndexToRemove, 1);
-                                }
-                            });
+                            // remove ghost
+                            elementCopy.remove();
+                            elementCopy = null;
 
-                            /*  Custom method for DRAG END
-                             If there is no any custom method for Drag End - resolve promise and finalize dropping action
-                             */
-                            if (typeof scope.settings.customMethods.dragEnd === 'function') {
-                                scope.settings.customMethods.dragEnd(target.isDroppable, rootParent, scope, target, deferred);
-                            } else {
-                                deferred.resolve(elementIndexToAdd);
-                            }
-                        } else {
-                            if (typeof scope.settings.customMethods.dragEnd === 'function') {
-                                scope.settings.customMethods.dragEnd(target.isDroppable, rootParent, scope, target, deferred);
-                            }
-                        }
-
-                        // reset positions
-                        startX = startY = 0;
-
-                        // remove ghost
-                        elementCopy.remove();
-                        elementCopy = null;
-
-                        // remove drop area indicator
-                        if (typeof dropIndicator !== 'undefined') {
-                            dropIndicator.remove();
+                            // remove drop area indicator
+                            if (typeof dropIndicator !== 'undefined') {
+                                dropIndicator.remove();
 //                            dropIndicator = null;
+                            }
+
+                            // Remove styles from old drop to directory indicator (DOM element)
+                            if (typeof dropToDirEl !== 'undefined') {
+                                dropToDirEl.removeClass('dropToDir');
+                            }
+
+                            // reset droppable
+                            target.isDroppable = false;
+
+                            // remove styles for whole treeview
+                            rootParent.el.removeClass('dragging');
+
+                            // reset styles for dragged element
+                            element
+                                .removeClass('dragged')
+                                .removeAttr('style');
                         }
-
-                        // Remove styles from old drop to directory indicator (DOM element)
-                        if (typeof dropToDirEl !== 'undefined') {
-                            dropToDirEl.removeClass('dropToDir');
-                        }
-
-                        // reset droppable
-                        target.isDroppable = false;
-
-                        // remove styles for whole treeview
-                        rootParent.el.removeClass('dragging');
-
-                        // reset styles for dragged element
-                        element
-                            .removeClass('dragged')
-                            .removeAttr('style');
 
                         // remove events from $document
                         $document
                             .off('mousemove', mousemove)
                             .off('mouseup', mouseup);
+
+                        firstMove = true;
                     }
 
                     function isInsideGhost(targetTreeView) {

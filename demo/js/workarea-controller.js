@@ -1,6 +1,14 @@
 'use strict';
 
-angular.module('app').controller('WorkareaController', function ($scope, $modal, treeData, treeAvailableNodes) {
+angular.module('app').controller('WorkareaController', ['$scope', '$modal', '$treeview', 'treeData', 'treeAvailableNodes', function ($scope, $modal, $treeview, treeData, treeAvailableNodes) {
+
+    $scope.$on('treeview-selected', function (event, arg) {
+        $scope.selected = arg;
+    });
+
+    $scope.$on('treeview-unselected', function () {
+        $scope.selected = null;
+    });
 
     $scope.tData = treeData.data;
     $scope.subnodes = treeAvailableNodes.data;
@@ -55,9 +63,9 @@ angular.module('app').controller('WorkareaController', function ($scope, $modal,
     $scope.treeSettings = {
         addable: true,
         removable: true,
-        selectable: false,
+        selectable: true,
+        rootSelected: true,
         expandAll: false,
-        expandToLevel: 3,
 
         iconsBaseClass: 'fa',
         icons: {
@@ -80,7 +88,7 @@ angular.module('app').controller('WorkareaController', function ($scope, $modal,
             dragging: $scope.dragging*/
         }
     };
-});
+}]);
 
 var ModalInstanceCtrl = function ($scope, $modalInstance, subnodes, treescope) {
 

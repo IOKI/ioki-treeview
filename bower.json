@@ -1,6 +1,6 @@
 {
   "name": "ioki-treeview",
-  "version": "0.1.17",
+  "version": "0.1.18",
   "ignore": [
     "demo",
     "node_modules",
@@ -16,8 +16,8 @@
     "README.md"
   ],
   "dependencies": {
-    "angular": "1.2.21",
-    "angular-bindonce": "0.3.1"
+    "angular": "~1.2.21",
+    "angular-bindonce": "~0.3.1"
   },
   "devDependencies": {
     "angular-mocks": "1.2.21",
