@@ -1,6 +1,6 @@
 <div bindonce
      ng-class="{'expanded': treedata.expanded, 'selected': treedata.selected, 'dir': treedata.subnodes}"
-     ng-click="$selectNode()">
+     ng-click="$selectNode($event)">
 
     <!-- expander icon -->
     <i class="expander"

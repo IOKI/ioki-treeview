@@ -191,8 +191,8 @@ angular.module('ioki.treeview', [
                     $treeview.toggleNode();
                 };
 
-                scope.$selectNode = function () {
-                    $treeview.selectNode();
+                scope.$selectNode = function (ev) {
+                    $treeview.selectNode(ev);
                 };
 
                 /**
@@ -216,18 +216,23 @@ angular.module('ioki.treeview', [
                  * This method mark current node as selected and unselect other nodes in TreeView
                  * If selected node is the same as current node it will be unselect
                  */
-                $treeview.selectNode = function () {
+                $treeview.selectNode = function (ev) {
                     var state;
 
                     if (options.settings.selectable) {
-                        // save actual state
-                        state = scope.treedata.selected;
+                        if (typeof ev.toElement.attributes['ng-click'] !== 'undefined' && ev.toElement.attributes['ng-click'].value !== '$selectNode($event)') {
+                            setPropertyForAllNodes('selected', false);
+                            scope.treedata.selected = true;
+                        } else {
+                            // save actual state
+                            state = scope.treedata.selected;
 
-                        // unselect all nodes
-                        setPropertyForAllNodes('selected', false);
+                            // unselect all nodes
+                            setPropertyForAllNodes('selected', false);
 
-                        // change state of clicked element on opposite state
-                        scope.treedata.selected = !state;
+                            // change state of clicked element on opposite state
+                            scope.treedata.selected = !state;
+                        }
 
                         if (scope.treedata.selected) {
                             $rootScope.$broadcast('treeview-selected', scope.treedata);
@@ -377,6 +382,7 @@ angular.module('ioki.treeview', [
             compile: function (element) {
 
                 // cache root
+                // beside recursive nature of treeview the code below will be executed exactly once
                 if (typeof rootParent === 'undefined') {
                     element.attr('treeview-element-type', 'root');
                     rootParent = {};
@@ -469,10 +475,6 @@ angular.module('ioki.treeview', [
                             $document
                                 .on('mousemove touchmove', mousemove)
                                 .on('mouseup touchend', mouseup);
-
-                            if (typeof scope.settings.customMethods.dragStart === 'function') {
-                                scope.settings.customMethods.dragStart(rootParent, scope, element);
-                            }
                         }
 
                         isMoving = false;
@@ -512,6 +514,10 @@ angular.module('ioki.treeview', [
                                     top:    element[0].offsetTop    + 'px',
                                     width:  elementWidth            + 'px'
                                 });
+
+                            if (typeof scope.settings.customMethods.dragStart === 'function') {
+                                scope.settings.customMethods.dragStart(rootParent, scope, element);
+                            }
 
                             firstMove = false;
                         }
@@ -790,7 +796,7 @@ angular.module('ioki.treeview').run(['$templateCache', function($templateCache) 
   $templateCache.put('templates/ioki-treeview',
     "<div bindonce\n" +
     "     ng-class=\"{'expanded': treedata.expanded, 'selected': treedata.selected, 'dir': treedata.subnodes}\"\n" +
-    "     ng-click=\"$selectNode()\">\n" +
+    "     ng-click=\"$selectNode($event)\">\n" +
     "\n" +
     "    <!-- expander icon -->\n" +
     "    <i class=\"expander\"\n" +

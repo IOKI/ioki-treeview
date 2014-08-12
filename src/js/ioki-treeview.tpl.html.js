@@ -4,7 +4,7 @@ angular.module('ioki.treeview').run(['$templateCache', function($templateCache) 
   $templateCache.put('templates/ioki-treeview',
     "<div bindonce\n" +
     "     ng-class=\"{'expanded': treedata.expanded, 'selected': treedata.selected, 'dir': treedata.subnodes}\"\n" +
-    "     ng-click=\"$selectNode()\">\n" +
+    "     ng-click=\"$selectNode($event)\">\n" +
     "\n" +
     "    <!-- expander icon -->\n" +
     "    <i class=\"expander\"\n" +
