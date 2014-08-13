@@ -23,7 +23,10 @@
                 <div class="col-md-4">
                     <treeview treedata="treeData" treesettings="treeSettings" ng-repeat="treeData in tData"></treeview>
                 </div>
-                <div class="col-md-8">Content area<br/>selected: {{selected.name}}</div>
+                <div class="col-md-8">
+                    Content area<br/>
+                    <br/>selected: {{selected.name}}
+                    <br/>parent: {{parent.name}}</div>
             </div>
         </div>
     </div>

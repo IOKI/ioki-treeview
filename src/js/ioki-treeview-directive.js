@@ -377,6 +377,13 @@ angular.module('ioki.treeview', [
                         scope.treedata.expanded = (scope.treedata.level < settings.expandToLevel);
                     }
 
+                    // Method getParent
+                    scope.treedata.getParent = function() {
+                        var parent = scope.$parent.$parent.$parent.treedata;
+
+                        return (typeof parent !== 'undefined') ? parent : null;
+                    };
+
                     // Get name of template
                     templateURL = scope.settings.template || 'templates/ioki-treeview';
 
@@ -672,7 +679,6 @@ angular.module('ioki.treeview', [
                             // remove drop area indicator
                             if (typeof dropIndicator !== 'undefined') {
                                 dropIndicator.remove();
-//                            dropIndicator = null;
                             }
 
                             // Remove styles from old drop to directory indicator (DOM element)

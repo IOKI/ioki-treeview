@@ -4,6 +4,7 @@ angular.module('app').controller('WorkareaController', ['$scope', '$modal', '$tr
 
     $scope.$on('treeview-selected', function (event, arg) {
         $scope.selected = arg;
+        $scope.parent = arg.getParent();
     });
 
     $scope.$on('treeview-unselected', function () {
