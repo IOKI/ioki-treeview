@@ -2,6 +2,32 @@ angular.module('ioki.treeview', [
         'RecursionHelper',
         'pasvaz.bindonce'
     ])
+    .service('TreeviewManager', ['$rootScope', function ($rootScope) {
+        var self = this;
+
+        this.selectedNode = {};
+        this.selectedNodeScope = {};
+
+        this.getSelectedNodeScope = function () {
+            return self.selectedNodeScope;
+        };
+
+        this.setSelectedNode = function (scope) {
+            console.log('select node scope', scope);
+
+            self.selectedNodeScope = scope;
+            self.selectedNode = scope.treedata;
+
+            $rootScope.$broadcast('treeview-selected', scope.treedata);
+        };
+
+        this.unselectNode = function () {
+            self.selectedNodeScope = {};
+            self.selectedNode = {};
+
+            $rootScope.$broadcast('treeview-unselected', {});
+        };
+    }])
     .provider('$treeview', function () {
         'use strict';
 
@@ -61,7 +87,7 @@ angular.module('ioki.treeview', [
             },
             options = {};
 
-        this.$get = function ($rootScope) {
+        this.$get = function (TreeviewManager) {
 
             function TreeViewFactory (config) {
                 var $treeview = {}, scope,
@@ -104,7 +130,7 @@ angular.module('ioki.treeview', [
 
                     if (options.settings.rootSelected && _isRootNode(scope)){
                         scope.treedata.selected = true;
-                        $rootScope.$broadcast('treeview-selected', scope.treedata);
+                        TreeviewManager.setSelectedNode(scope);
                     }
                 }
 
@@ -171,8 +197,12 @@ angular.module('ioki.treeview', [
                 $treeview.selectNode = function (ev) {
                     var state;
 
+                    console.log('\n SELECTED' + scope.treedata.name);
+                    console.log('ev.target', ev.target);
+                    console.log('\n');
+                    
                     if (options.settings.selectable) {
-                        if (typeof ev.toElement.attributes['ng-click'] !== 'undefined' && ev.toElement.attributes['ng-click'].value !== '$selectNode($event)') {
+                        if (typeof ev.target.attributes['ng-click'] !== 'undefined' && ev.target.attributes['ng-click'].value !== '$selectNode($event)') {
                             setPropertyForAllNodes('selected', false);
                             scope.treedata.selected = true;
                         } else {
@@ -187,9 +217,9 @@ angular.module('ioki.treeview', [
                         }
 
                         if (scope.treedata.selected) {
-                            $rootScope.$broadcast('treeview-selected', scope.treedata);
+                            TreeviewManager.setSelectedNode(scope);
                         } else {
-                            $rootScope.$broadcast('treeview-unselected', scope.treedata);
+                            TreeviewManager.unselectNode();
                         }
                     }
                 };
@@ -226,22 +256,30 @@ angular.module('ioki.treeview', [
                  */
                 $treeview.removeNode = function () {
                     var node = scope.treedata,
-                        parent, subnodesArray, index;
+                        parent, parentScope, index;
 
                     if (options.settings.removable) {
                         if (typeof options.settings.customMethods.removeNode === 'function') {
                             options.settings.customMethods.removeNode(scope);
                         } else {
-                            parent = scope.$parent.$parent.treedata;
+                            parent = node.getParent();
 
-                            if (typeof parent !== 'undefined') {
-                                subnodesArray = parent.subnodes;
+                            if (parent !== null && angular.isArray(parent.subnodes)) {
 
-                                if (angular.isArray(subnodesArray)) {
-                                    index = subnodesArray.indexOf(node);
+                                index = parent.subnodes.indexOf(node);
 
-                                    if (index > -1) {
-                                        subnodesArray.splice(index,1);
+                                if (index > -1) {
+
+                                    if (node.selected) {
+                                        parentScope = node.getParentScope();
+
+                                        parent.selected = true;
+
+                                        TreeviewManager.setSelectedNode(parentScope);
+
+                                        parent.subnodes.splice(index,1);
+
+                                        parentScope.$apply();
                                     }
                                 }
                             }
@@ -318,11 +356,14 @@ angular.module('ioki.treeview', [
             return TreeViewFactory;
         };
     })
-    .directive("treeview", ['RecursionHelper', '$treeview', '$templateCache', '$compile', '$document', '$window', '$q', function (RecursionHelper, $treeview, $templateCache, $compile, $document, $window, $q) {
+    .directive("treeview", ['RecursionHelper', '$treeview', '$templateCache', '$compile', '$document', '$window', '$q', 'TreeviewManager', function (RecursionHelper, $treeview, $templateCache, $compile, $document, $window, $q, TreeviewManager) {
         'use strict';
 
         var rootParent,
-            settings = {};
+            settings = {},
+            globalEvent = {
+                keypress: false
+            };
 
         return {
             restrict: "E",
@@ -379,9 +420,22 @@ angular.module('ioki.treeview', [
 
                     // Method getParent
                     scope.treedata.getParent = function() {
+                        console.log('get Parent', scope.$parent.$parent.$parent.treedata);
                         var parent = scope.$parent.$parent.$parent.treedata;
 
                         return (typeof parent !== 'undefined') ? parent : null;
+                    };
+
+                    // Method getParentScope
+                    scope.treedata.getParentScope = function () {
+                        var parent = scope.$parent.$parent.$parent;
+
+                        return (typeof parent !== 'undefined') ? parent : null;
+                    };
+
+                    // Method getScope
+                    scope.treedata.getScope = function () {
+                        return scope;
                     };
 
                     // Get name of template
@@ -409,6 +463,168 @@ angular.module('ioki.treeview', [
                         if (options.settings.showExpander)  { element.addClass('show-expander');    }
                         if (!options.settings.removable)    { element.addClass('unremovable');      }
                         if (!options.settings.addable)      { element.addClass('unaddable');        }
+                    }
+
+                    if(!globalEvent.keypress) {
+                        $document.on('keydown', keydown);
+                        globalEvent.keypress = true;
+                    }
+
+                    function keydown (event) {
+                        var key = event.keyCode,
+                            scope,
+                            moveControl;
+
+                        moveControl = {
+                            select: function (scope, newScope) {
+                                scope.treedata.selected = false;
+                                newScope.treedata.selected = true;
+
+                                TreeviewManager.setSelectedNode(newScope);
+
+                                newScope.$apply();
+                            },
+                            left: function (scope) {
+                                scope.$apply(function () {
+                                    scope.treedata.expanded = false;
+                                });
+                            },
+                            top: function (scope) {
+                                var node = scope.treedata,
+                                    parent = node.getParent(),
+                                    parentScope = node.getParentScope(),
+                                    lastInPrevElement,
+                                    prevElement, prevElementScope,
+                                    index;
+
+                                if (parent !== null) {
+                                    index = parent.subnodes.indexOf(node);
+
+                                    if (index > 0) {
+                                        // node has a sibling
+
+                                        prevElement = parent.subnodes[index - 1];
+                                        prevElementScope = prevElement.getScope();
+
+                                        while (prevElement.expanded && typeof prevElement.subnodes !== 'undefined' && prevElement.subnodes.length > 0) {
+                                            lastInPrevElement = prevElement.subnodes[prevElement.subnodes.length - 1];
+                                            console.log('prevElementScope', prevElementScope);
+                                            prevElementScope = lastInPrevElement.getScope();
+
+                                            prevElement = lastInPrevElement;
+                                        }
+
+                                        moveControl.select(scope, prevElementScope);
+                                    } else {
+                                        // first node in array - should select its parent
+                                        moveControl.select(scope, parentScope);
+                                    }
+                                }
+                            },
+                            right: function (scope) {
+                                scope.$apply(function () {
+                                    scope.treedata.expanded = true;
+                                });
+                            },
+                            bottom: function (scope) {
+                                var node = scope.treedata,
+                                    parent = node.getParent(),
+                                    beforeParent,
+                                    nextElement, nextElementScope,
+                                    index;
+
+
+                                if (node.expanded) {
+                                    // node is expanded - so go to first child
+
+                                    if (typeof node.subnodes[0] !== 'undefined') {
+                                        nextElement = node.subnodes[0];
+                                        nextElementScope = nextElement.getScope();
+
+                                        moveControl.select(scope, nextElementScope);
+                                    } else {
+                                        index = parent.subnodes.indexOf(node);
+
+                                        console.log('parent', parent);
+
+                                        nextElement = parent.subnodes[index + 1];
+
+                                        console.log('nextElement', nextElement);
+                                        nextElementScope = nextElement.getScope();
+
+                                        moveControl.select(scope, nextElementScope);
+                                    }
+                                } else {
+                                    // node is not expanded
+
+                                    console.log('bottom parent', parent);
+
+                                    index = parent.subnodes.indexOf(node);
+
+                                    if (index > -1) {
+                                        console.log('index', index);
+                                        console.log('parent.subnodes', parent.subnodes);
+                                        console.log('node', node);
+
+                                        if (typeof parent.subnodes[index + 1] !== 'undefined') {
+                                            // node is not last in subnodes array
+
+                                            nextElement = parent.subnodes[index + 1];
+                                            nextElementScope = nextElement.getScope();
+
+                                            moveControl.select(scope, nextElementScope);
+                                        } else {
+                                            // it is the last node
+                                            do {
+                                                beforeParent = parent.getParent();
+                                                index = beforeParent.subnodes.indexOf(parent);
+
+                                                parent = beforeParent;
+
+                                                console.log('\nbeforeParent', beforeParent);
+                                                console.log('index', index);
+                                                console.log('beforeParent.subnodes[index + 1]', beforeParent.subnodes[index + 1]);
+
+                                                if (typeof beforeParent.subnodes[index + 1] !== 'undefined') {
+                                                    nextElement = beforeParent.subnodes[index + 1];
+                                                    nextElementScope = nextElement.getScope();
+                                                }
+                                            } while (typeof beforeParent.subnodes[index + 1] === 'undefined' || beforeParent === null);
+
+                                            console.log('scope', scope);
+                                            console.log('nextElementScope', nextElementScope);
+
+                                            moveControl.select(scope, nextElementScope);
+                                        }
+                                    }
+
+                                }
+                            }
+                        };
+
+                        console.log('key', key);
+
+                        if ((key >= 37 && key <= 40) || key === 46) {
+                            scope = TreeviewManager.getSelectedNodeScope();
+
+                            switch (key) {
+                                case 37:
+                                    moveControl.left(scope);
+                                    break;
+                                case 38:
+                                    moveControl.top(scope);
+                                    break;
+                                case 39:
+                                    moveControl.right(scope);
+                                    break;
+                                case 40:
+                                    moveControl.bottom(scope);
+                                    break;
+                                case 46: // delete
+                                    scope.$removeNode();
+                                    break;
+                            }
+                        }
                     }
 
                     function mousedown (event) {

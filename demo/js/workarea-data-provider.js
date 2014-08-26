@@ -59,33 +59,57 @@ angular.module('app').factory('treeData', function treeData() {
                                     type: 'activity'
                                 }
                             ]
-                        },
+                        }
+                    ]
+                },
+                {
+                    name: 'Node 1.4',
+                    type: 'directory',
+                    expanded: false,
+                    subnodes: []
+                },
+                {
+                    name: 'Node 1.3',
+                    type: 'directory',
+                    expanded: true,
+                    subnodes: [
                         {
-                            name: 'Node 1.3.2',
+                            name: 'Node 1.3.1',
                             type: 'directory',
+                            expanded: true,
                             subnodes: [
                                 {
-                                    name: 'Form',
-                                    type: 'form'
+                                    name: 'Super activity',
+                                    type: 'activity'
                                 }
                             ]
                         },
-                        {
-                            name: 'Summary 1',
-                            type: 'activity'
-                        },
-                        {
-                            name: 'Summary 2',
-                            type: 'activity'
-                        },
-                        {
-                            name: 'Summary 3',
-                            type: 'activity'
-                        },
-                        {
-                            name: 'Summary 4',
-                            type: 'activity'
-                        }
+                         {
+                         name: 'Node 1.3.2',
+                         type: 'directory',
+                         subnodes: [
+                         {
+                         name: 'Form',
+                         type: 'form'
+                         }
+                         ]
+                         },
+                         {
+                         name: 'Summary 1',
+                         type: 'activity'
+                         },
+                         {
+                         name: 'Summary 2',
+                         type: 'activity'
+                         },
+                         {
+                         name: 'Summary 3',
+                         type: 'activity'
+                         },
+                         {
+                         name: 'Summary 4',
+                         type: 'activity'
+                         }
                     ]
                 }
             ]
