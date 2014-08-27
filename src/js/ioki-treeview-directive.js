@@ -275,7 +275,27 @@ angular.module('ioki.treeview', [
 
                                         parent.subnodes.splice(index,1);
 
-                                        parentScope.$apply();
+                                        /* ugly hack, TODO: ask on stackoverflow and refactor
+                                            PROBLEM:
+                                                Nodes after index lost reference to $parent after splice.
+                                                This causes problem with getting proper parent for these elements.
+
+                                            TEMPORARY RESOLUTION:
+                                                Applying parent.expanded to false and later to true triggers
+                                                recompilation of scope. Thanks to this inherited scopes have proper
+                                                references to their parents.
+
+                                            ACTIONS:
+                                                Needs further research why $parent references are set to null after
+                                                splice.
+                                         */
+                                        parentScope.$apply(function () {
+                                            parent.expanded = false;
+                                        });
+
+                                        parentScope.$apply(function () {
+                                            parent.expanded = true;
+                                        });
                                     }
                                 }
                             }
@@ -528,25 +548,18 @@ angular.module('ioki.treeview', [
                                     index;
 
 
-                                if (node.expanded) {
-                                    // node is expanded - so go to first child
+                                if (node.expanded && angular.isArray(node.subnodes) && typeof node.subnodes[0] !== 'undefined') {
+                                    /* node is:
+                                        - a directory
+                                        - expanded
+                                        - has a child
+                                    - so go to first child */
 
-                                    if (typeof node.subnodes[0] !== 'undefined') {
-                                        nextElement = node.subnodes[0];
-                                        nextElementScope = nextElement.getScope();
+                                    nextElement = node.subnodes[0];
+                                    nextElementScope = nextElement.getScope();
 
-                                        moveControl.select(scope, nextElementScope);
-                                    } else {
-                                        index = parent.subnodes.indexOf(node);
-
-                                        nextElement = parent.subnodes[index + 1];
-                                        nextElementScope = nextElement.getScope();
-
-                                        moveControl.select(scope, nextElementScope);
-                                    }
+                                    moveControl.select(scope, nextElementScope);
                                 } else {
-                                    // node is not expanded
-
                                     index = parent.subnodes.indexOf(node);
 
                                     if (index > -1) {

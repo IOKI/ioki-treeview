@@ -141,13 +141,11 @@ treeview.dragged {
   position: absolute;
   cursor: pointer;
   border: solid 1px #66afe9;
-  -webkit-border-radius: 4px;
   -moz-border-radius: 4px;
-  -ms-border-radius: 4px;
-  -o-border-radius: 4px;
+  -webkit-border-radius: 4px;
   border-radius: 4px;
-  -webkit-box-shadow: 0 0 7px rgba(0, 0, 0, 0.35);
   -moz-box-shadow: 0 0 7px rgba(0, 0, 0, 0.35);
+  -webkit-box-shadow: 0 0 7px rgba(0, 0, 0, 0.35);
   box-shadow: 0 0 7px rgba(0, 0, 0, 0.35);
   opacity: .75;
 }
@@ -161,12 +159,10 @@ treeview.dragged > div {
 treeview.ghost {
   background-color: #fff;
   border: solid 1px #66afe9;
-  -webkit-border-radius: 4px;
   -moz-border-radius: 4px;
-  -ms-border-radius: 4px;
-  -o-border-radius: 4px;
+  -webkit-border-radius: 4px;
   border-radius: 4px;
-  -webkit-box-shadow: 0 0 7px rgba(0, 0, 0, 0.35);
   -moz-box-shadow: 0 0 7px rgba(0, 0, 0, 0.35);
+  -webkit-box-shadow: 0 0 7px rgba(0, 0, 0, 0.35);
   box-shadow: 0 0 7px rgba(0, 0, 0, 0.35);
 }
