@@ -3,6 +3,8 @@ angular.module('ioki.treeview', [
         'pasvaz.bindonce'
     ])
     .service('TreeviewManager', ['$rootScope', function ($rootScope) {
+        'use strict';
+
         var self = this;
 
         this.selectedNode = {};
@@ -13,8 +15,6 @@ angular.module('ioki.treeview', [
         };
 
         this.setSelectedNode = function (scope) {
-            console.log('select node scope', scope);
-
             self.selectedNodeScope = scope;
             self.selectedNode = scope.treedata;
 
@@ -197,10 +197,6 @@ angular.module('ioki.treeview', [
                 $treeview.selectNode = function (ev) {
                     var state;
 
-                    console.log('\n SELECTED' + scope.treedata.name);
-                    console.log('ev.target', ev.target);
-                    console.log('\n');
-                    
                     if (options.settings.selectable) {
                         if (typeof ev.target.attributes['ng-click'] !== 'undefined' && ev.target.attributes['ng-click'].value !== '$selectNode($event)') {
                             setPropertyForAllNodes('selected', false);
@@ -420,7 +416,6 @@ angular.module('ioki.treeview', [
 
                     // Method getParent
                     scope.treedata.getParent = function() {
-                        console.log('get Parent', scope.$parent.$parent.$parent.treedata);
                         var parent = scope.$parent.$parent.$parent.treedata;
 
                         return (typeof parent !== 'undefined') ? parent : null;
@@ -508,7 +503,6 @@ angular.module('ioki.treeview', [
 
                                         while (prevElement.expanded && typeof prevElement.subnodes !== 'undefined' && prevElement.subnodes.length > 0) {
                                             lastInPrevElement = prevElement.subnodes[prevElement.subnodes.length - 1];
-                                            console.log('prevElementScope', prevElementScope);
                                             prevElementScope = lastInPrevElement.getScope();
 
                                             prevElement = lastInPrevElement;
@@ -545,11 +539,7 @@ angular.module('ioki.treeview', [
                                     } else {
                                         index = parent.subnodes.indexOf(node);
 
-                                        console.log('parent', parent);
-
                                         nextElement = parent.subnodes[index + 1];
-
-                                        console.log('nextElement', nextElement);
                                         nextElementScope = nextElement.getScope();
 
                                         moveControl.select(scope, nextElementScope);
@@ -557,15 +547,9 @@ angular.module('ioki.treeview', [
                                 } else {
                                     // node is not expanded
 
-                                    console.log('bottom parent', parent);
-
                                     index = parent.subnodes.indexOf(node);
 
                                     if (index > -1) {
-                                        console.log('index', index);
-                                        console.log('parent.subnodes', parent.subnodes);
-                                        console.log('node', node);
-
                                         if (typeof parent.subnodes[index + 1] !== 'undefined') {
                                             // node is not last in subnodes array
 
@@ -581,18 +565,11 @@ angular.module('ioki.treeview', [
 
                                                 parent = beforeParent;
 
-                                                console.log('\nbeforeParent', beforeParent);
-                                                console.log('index', index);
-                                                console.log('beforeParent.subnodes[index + 1]', beforeParent.subnodes[index + 1]);
-
                                                 if (typeof beforeParent.subnodes[index + 1] !== 'undefined') {
                                                     nextElement = beforeParent.subnodes[index + 1];
                                                     nextElementScope = nextElement.getScope();
                                                 }
                                             } while (typeof beforeParent.subnodes[index + 1] === 'undefined' || beforeParent === null);
-
-                                            console.log('scope', scope);
-                                            console.log('nextElementScope', nextElementScope);
 
                                             moveControl.select(scope, nextElementScope);
                                         }
@@ -602,7 +579,7 @@ angular.module('ioki.treeview', [
                             }
                         };
 
-                        console.log('key', key);
+//                        console.log('key', key);
 
                         if ((key >= 37 && key <= 40) || key === 46) {
                             scope = TreeviewManager.getSelectedNodeScope();
