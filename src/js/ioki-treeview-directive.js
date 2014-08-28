@@ -572,19 +572,25 @@ angular.module('ioki.treeview', [
                                             moveControl.select(scope, nextElementScope);
                                         } else {
                                             // it is the last node
+
                                             do {
                                                 beforeParent = parent.getParent();
-                                                index = beforeParent.subnodes.indexOf(parent);
 
-                                                parent = beforeParent;
+                                                if (beforeParent !== null) {
+                                                    index = beforeParent.subnodes.indexOf(parent);
 
-                                                if (typeof beforeParent.subnodes[index + 1] !== 'undefined') {
-                                                    nextElement = beforeParent.subnodes[index + 1];
-                                                    nextElementScope = nextElement.getScope();
+                                                    parent = beforeParent;
+
+                                                    if (typeof beforeParent.subnodes[index + 1] !== 'undefined') {
+                                                        nextElement = beforeParent.subnodes[index + 1];
+                                                        nextElementScope = nextElement.getScope();
+                                                    }
                                                 }
-                                            } while (typeof beforeParent.subnodes[index + 1] === 'undefined' || beforeParent === null);
+                                            } while (beforeParent !== null && typeof beforeParent.subnodes[index + 1] === 'undefined');
 
-                                            moveControl.select(scope, nextElementScope);
+                                            if (typeof nextElementScope !== 'undefined') {
+                                                moveControl.select(scope, nextElementScope);
+                                            }
                                         }
                                     }
 
