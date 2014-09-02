@@ -2,9 +2,14 @@
 
 angular.module('app').controller('WorkareaController', ['$scope', '$modal', '$treeview', 'treeData', 'treeAvailableNodes', function ($scope, $modal, $treeview, treeData, treeAvailableNodes) {
 
-    $scope.$on('treeview-selected', function (event, arg) {
-        $scope.selected = arg;
-        $scope.parent = arg.getParent();
+    $scope.$on('treeview-selected', function (event, selectedScope) {
+        var parent = selectedScope.getParent();
+
+        $scope.selected = selectedScope.treedata;
+
+        if (parent !== null) {
+            $scope.parent = parent.treedata;
+        }
     });
 
     $scope.$on('treeview-unselected', function () {

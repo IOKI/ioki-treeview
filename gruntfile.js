@@ -47,6 +47,8 @@ module.exports = function(grunt) {
                 src: [
                     'src/js/recursionhelper.js',
                     'src/js/ioki-treeview-directive.js',
+                    'src/js/treeview-provider.js',
+                    'src/js/treeview-manager-service.js',
                     'src/js/ioki-treeview.tpl.html.js',
                     'src/js/ioki-treeview-filters.js'
                 ],

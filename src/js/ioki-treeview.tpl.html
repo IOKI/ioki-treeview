@@ -1,31 +1,26 @@
-<div bindonce
-     ng-class="{'expanded': treedata.expanded, 'selected': treedata.selected, 'dir': treedata.subnodes}"
+<div ng-class="{'expanded': treedata.expanded, 'selected': treedata.selected, 'dir': treedata.subnodes}"
      ng-click="$selectNode($event)">
 
     <!-- expander icon -->
-    <i class="expander"
-       bo-class="settings.iconsBaseClass"
+    <i class="fa expander"
        ng-click="$toggleNode()"></i>
 
     <!-- node icon -->
-    <i class="node-icon"
-       bo-class="settings.iconsBaseClass"></i>
+    <i class="fa node-icon"></i>
 
     <!-- node label -->
     <span class="node-label" ng-bind="treedata.name"></span>
 
     <!-- remove node icon -->
-    <i class="remove-node"
-       bo-class="settings.iconsBaseClass"
+    <i class="fa remove-node"
        ng-click="$removeNode()"></i>
 
     <!-- add node icon -->
-    <i class="add-node"
-       bo-class="settings.iconsBaseClass"
+    <i class="fa add-node"
        ng-click="$addNode()"></i>
 </div>
 <ul ng-if="treedata.subnodes && treedata.expanded">
-    <li ng-repeat="subnode in treedata.subnodes track by $index">
+    <li ng-repeat="subnode in treedata.subnodes track by subnode.id">
         <treeview treedata="subnode"></treeview>
     </li>
 </ul>

@@ -47,387 +47,13 @@ angular.module('RecursionHelper', []).factory('RecursionHelper', ['$compile', fu
     };
 }]);
 angular.module('ioki.treeview', [
-        'RecursionHelper',
-        'pasvaz.bindonce'
+        'RecursionHelper'
     ])
-    .service('TreeviewManager', ['$rootScope', function ($rootScope) {
-        'use strict';
-
-        var self = this;
-
-        this.selectedNode = {};
-        this.selectedNodeScope = {};
-
-        this.getSelectedNodeScope = function () {
-            return self.selectedNodeScope;
-        };
-
-        this.setSelectedNode = function (scope) {
-            self.selectedNodeScope = scope;
-            self.selectedNode = scope.treedata;
-
-            $rootScope.$broadcast('treeview-selected', scope.treedata);
-        };
-
-        this.unselectNode = function () {
-            self.selectedNodeScope = {};
-            self.selectedNode = {};
-
-            $rootScope.$broadcast('treeview-unselected', {});
-        };
-    }])
-    .provider('$treeview', function () {
-        'use strict';
-
-        var defaults = this.defaults = {
-                prefixClass: 'treeview-',
-                prefixEvent: 'treeview',
-                treesettings: {
-                    /* template URL */
-                    template: 'templates/ioki-treeview',
-
-                    /* base class for icons system
-                     * e.g. 'fa' for FontAwesome, 'glyphicons' for Glyphicons etc.
-                     * we use FontAwesome by default
-                     */
-                    iconsBaseClass: 'fa',
-
-                    /* define if user can expand / collapse nodes */
-                    expandable: true,
-
-                    /* define if all nodes should be expanded on loading the tree */
-                    expandAll: true,
-
-                    /* [optional] define how deep the tree should be expanded on load */
-                    // expandToLevel: [Number]
-
-                    /* define if user see expanders */
-                    showExpander: true,
-
-                    /* define if user can remove nodes */
-                    removable: false,
-
-                    /* define if user can add nodes */
-                    addable: true,
-
-                    /* define if user can select node */
-                    selectable: false,
-
-                    /* define if root node should be selected on load */
-                    rootSelected: false,
-
-                    /* treeview offers custom methods via controller's scope */
-                    customMethods: {
-                        /* addNode method */
-                        addNode: null,
-                        /* removeNode method */
-                        removeNode: null,
-                        /* method is called when node is started to drag (fire once) */
-                        dragStart: null,
-                        /* method is called when node is stopped to drag (fire once) */
-                        dragEnd: null,
-                        /* method is called when node is dragged */
-                        dragging: null,
-                        /* method is called when node is dropped */
-                        drop: null
-                    }
-                }
-            },
-            options = {};
-
-        this.$get = function (TreeviewManager) {
-
-            function TreeViewFactory (config) {
-                var $treeview = {}, scope,
-                    prop;
-
-                function _isRootNode (scope) {
-                    return typeof scope.$parent.$parent.treedata === 'undefined';
-                }
-
-                /**
-                 * _Private Method isNodeRemovable
-                 *
-                 * Is node removable is determine by global settings (options.settings.removable)
-                 * User also can not remove Parent Node for whole TreeView
-                 *
-                 * @param scope             - Object    - scope of the node
-                 * @returns {boolean}       - Boolean   - returns true if node is removable
-                 */
-                function _isNodeRemovable (scope) {
-                    return !(_isRootNode(scope) || !options.settings.removable);
-                }
-
-                /**
-                 * _Private Method configureScopeVars
-                 *
-                 * Method is configuring properties of node in scope.
-                 * Values depends on options provided by developer.
-                 *
-                 * @param scope             - Object    - scope of node
-                 * @param options           - Object    - options provided by developer
-                 * @private
-                 */
-                function _configureScopeVars(scope, options) {
-                    scope.treedata.$removable = _isNodeRemovable(scope);
-
-                    if (options.settings.expandAll && !scope.treedata.expandAllCalled) {
-                        scope.treedata.expanded = true;
-                        scope.treedata.expandAllCalled = true;
-                    }
-
-                    if (options.settings.rootSelected && _isRootNode(scope)){
-                        scope.treedata.selected = true;
-                        TreeviewManager.setSelectedNode(scope);
-                    }
-                }
-
-                options = $treeview.$options = angular.extend({}, defaults, config);
-
-                /*
-                 copy defaults options for treeview (@var defaults)
-                 if option specific for instance (@var config) wasn't defined
-                 */
-                for (prop in defaults.treesettings) {
-                    if (defaults.treesettings.hasOwnProperty(prop)) {
-                        if (typeof config.settings[prop] === 'undefined') {
-                            options.settings[prop] = defaults.treesettings[prop];
-                        }
-                    }
-                }
-
-                scope = $treeview.$scope = options.scope;
-                scope.settings = options.settings;
-
-                _configureScopeVars(scope, options);
-
-                /**
-                 * INTERFACE for TreeView available in Controller's scope
-                 */
-
-                scope.$addNode = function (obj) {
-                    $treeview.addNode(obj);
-                };
-
-                scope.$removeNode = function () {
-                    $treeview.removeNode();
-                };
-
-                scope.$toggleNode = function () {
-                    $treeview.toggleNode();
-                };
-
-                scope.$selectNode = function (ev) {
-                    $treeview.selectNode(ev);
-                };
-
-                /**
-                 * Method toggleNode
-                 *  1) available in TreeView's scope
-                 *  2) requires property "expandable" in treesettings to be true
-                 *
-                 * This method change state "expanded" in current node for opposite state
-                 */
-                $treeview.toggleNode = function () {
-                    if (options.settings.expandable) {
-                        scope.treedata.expanded = !scope.treedata.expanded;
-                    }
-                };
-
-                /**
-                 * Method selectNode
-                 *  1) available in TreeView's scope
-                 *  2) requires property "selectable" in treesettings to be true
-                 *
-                 * This method mark current node as selected and unselect other nodes in TreeView
-                 * If selected node is the same as current node it will be unselect
-                 */
-                $treeview.selectNode = function (ev) {
-                    var state;
-
-                    if (options.settings.selectable) {
-                        if (typeof ev.target.attributes['ng-click'] !== 'undefined' && ev.target.attributes['ng-click'].value !== '$selectNode($event)') {
-                            setPropertyForAllNodes('selected', false);
-                            scope.treedata.selected = true;
-                        } else {
-                            // save actual state
-                            state = scope.treedata.selected;
-
-                            // unselect all nodes
-                            setPropertyForAllNodes('selected', false);
-
-                            // change state of clicked element on opposite state
-                            scope.treedata.selected = !state;
-                        }
-
-                        if (scope.treedata.selected) {
-                            TreeviewManager.setSelectedNode(scope);
-                        } else {
-                            TreeviewManager.unselectNode();
-                        }
-                    }
-                };
-
-                /**
-                 * Method addNode
-                 *  1) available in TreeView's scope
-                 *  2) requires property "addable" in treesettings to be true
-                 *  3) requires customMethod addNode to be function
-                 *
-                 * This method adds new node to subnodes for current node
-                 *
-                 * Method allows to use custom function for manage adding process.
-                 * It could be useful if developer want to implement pop-up or drop down with possibility
-                 * to choose what kind of node user want to add.
-                 *
-                 * @param obj               - Object - additional info / settings that might help with managing adding process
-                 */
-                $treeview.addNode = function (obj) {
-                    if (options.settings.addable) {
-                        if (typeof options.settings.customMethods.addNode === 'function') {
-                            options.settings.customMethods.addNode(scope, obj);
-                        }
-                    }
-                };
-
-                /**
-                 * Method removeNode
-                 *  1) available in TreeView's scope
-                 *  2) requires property "removable" in treesettings to be true
-                 *  3) (optionally) can use customMethod removeNode
-                 *
-                 * This method removes current node
-                 */
-                $treeview.removeNode = function () {
-                    var node = scope.treedata,
-                        parent, parentScope, index;
-
-                    if (options.settings.removable) {
-                        if (typeof options.settings.customMethods.removeNode === 'function') {
-                            options.settings.customMethods.removeNode(scope);
-                        } else {
-                            parent = node.getParent();
-
-                            if (parent !== null && angular.isArray(parent.subnodes)) {
-
-                                index = parent.subnodes.indexOf(node);
-
-                                if (index > -1) {
-
-                                    if (node.selected) {
-                                        parentScope = node.getParentScope();
-
-                                        parent.selected = true;
-
-                                        TreeviewManager.setSelectedNode(parentScope);
-
-                                        parent.subnodes.splice(index,1);
-
-                                        /* ugly hack, TODO: ask on stackoverflow and refactor
-                                            PROBLEM:
-                                                Nodes after index lost reference to $parent after splice.
-                                                This causes problem with getting proper parent for these elements.
-
-                                            TEMPORARY RESOLUTION:
-                                                Applying parent.expanded to false and later to true triggers
-                                                recompilation of scope. Thanks to this inherited scopes have proper
-                                                references to their parents.
-
-                                            ACTIONS:
-                                                Needs further research why $parent references are set to null after
-                                                splice.
-                                         */
-                                        parentScope.$apply(function () {
-                                            parent.expanded = false;
-                                        });
-
-                                        parentScope.$apply(function () {
-                                            parent.expanded = true;
-                                        });
-                                    }
-                                }
-                            }
-
-                        }
-                    }
-                };
-
-                /**
-                 * Function setPropertyForAllNodes
-                 *
-                 * Function sets given property (@param prop) with given value (@param value) for all nodes in tree
-                 *
-                 * @param prop              - String
-                 * @param value             - String / Number / Boolean
-                 */
-                function setPropertyForAllNodes (prop, value) {
-                    var rootScope, rootNode, subnodes;
-
-                    if (typeof prop === 'string' && typeof value !== 'undefined') {
-                        rootScope = getRootNode(scope);
-                        rootNode = rootScope.treedata;
-                        subnodes = rootNode.subnodes;
-
-                        rootNode[prop] = value;
-                        setPropertyForSubnodes(subnodes, prop, value);
-                    }
-                }
-
-                /**
-                 * Function setPropertyForSubnodes
-                 *
-                 * Recursive function for setting given property (@param prop) with given value (@param value) for nodes on the same level
-                 *
-                 * @param actualSubnodes    - Array (with objects)
-                 * @param prop              - String
-                 * @param value             - String / Number / Boolean
-                 */
-                function setPropertyForSubnodes (actualSubnodes, prop, value) {
-                    var i, arrLen;
-
-                    if (angular.isArray(actualSubnodes)) {
-                        i = 0;
-                        arrLen = actualSubnodes.length;
-
-                        for (i; i < arrLen; i++) {
-                            actualSubnodes[i][prop] = value;
-
-                            setPropertyForSubnodes(actualSubnodes[i].subnodes, prop, value);
-                        }
-                    }
-                }
-
-                /**
-                 * Function getRootNode
-                 *
-                 * Recursive function for finding the root scope in TreeView. Every node knows only about itself and subnodes.
-                 * This helper function helps to find root scope beginning from actual node and its scope (@param scope).
-                 *
-                 * @param scope             - Angular Scope Object
-                 * @returns {*}             - Angular Scope Object - RootScope of TreeView
-                 */
-                function getRootNode (scope) {
-                    if (typeof scope.$parent.$parent.treedata === 'undefined') {
-                        return scope;
-                    } else {
-                        return getRootNode(scope.$parent.$parent);
-                    }
-                }
-
-                return $treeview;
-            }
-
-            return TreeViewFactory;
-        };
-    })
-    .directive("treeview", ['RecursionHelper', '$treeview', '$templateCache', '$compile', '$document', '$window', '$q', 'TreeviewManager', function (RecursionHelper, $treeview, $templateCache, $compile, $document, $window, $q, TreeviewManager) {
+    .directive("treeview", ['RecursionHelper', '$treeview', '$templateCache', '$compile', '$document', '$window', '$q', function (RecursionHelper, $treeview, $templateCache, $compile, $document, $window, $q) {
         'use strict';
 
         var rootParent,
-            settings = {},
-            globalEvent = {
-                keypress: false
-            };
+            settings = {};
 
         return {
             restrict: "E",
@@ -483,17 +109,10 @@ angular.module('ioki.treeview', [
                     }
 
                     // Method getParent
-                    scope.treedata.getParent = function() {
-                        var parent = scope.$parent.$parent.$parent.treedata;
+                    scope.getParent = function () {
+                        var parent = scope.$parent.$parent;
 
-                        return (typeof parent !== 'undefined') ? parent : null;
-                    };
-
-                    // Method getParentScope
-                    scope.treedata.getParentScope = function () {
-                        var parent = scope.$parent.$parent.$parent;
-
-                        return (typeof parent !== 'undefined') ? parent : null;
+                        return (typeof parent.treedata !== 'undefined') ? parent : null;
                     };
 
                     // Method getScope
@@ -526,149 +145,6 @@ angular.module('ioki.treeview', [
                         if (options.settings.showExpander)  { element.addClass('show-expander');    }
                         if (!options.settings.removable)    { element.addClass('unremovable');      }
                         if (!options.settings.addable)      { element.addClass('unaddable');        }
-                    }
-
-                    if(!globalEvent.keypress) {
-                        $document.on('keydown', keydown);
-                        globalEvent.keypress = true;
-                    }
-
-                    function keydown (event) {
-                        var key = event.keyCode,
-                            scope,
-                            moveControl;
-
-                        moveControl = {
-                            select: function (scope, newScope) {
-                                scope.treedata.selected = false;
-                                newScope.treedata.selected = true;
-
-                                TreeviewManager.setSelectedNode(newScope);
-
-                                newScope.$apply();
-                            },
-                            left: function (scope) {
-                                scope.$apply(function () {
-                                    scope.treedata.expanded = false;
-                                });
-                            },
-                            top: function (scope) {
-                                var node = scope.treedata,
-                                    parent = node.getParent(),
-                                    parentScope = node.getParentScope(),
-                                    lastInPrevElement,
-                                    prevElement, prevElementScope,
-                                    index;
-
-                                if (parent !== null) {
-                                    index = parent.subnodes.indexOf(node);
-
-                                    if (index > 0) {
-                                        // node has a sibling
-
-                                        prevElement = parent.subnodes[index - 1];
-                                        prevElementScope = prevElement.getScope();
-
-                                        while (prevElement.expanded && typeof prevElement.subnodes !== 'undefined' && prevElement.subnodes.length > 0) {
-                                            lastInPrevElement = prevElement.subnodes[prevElement.subnodes.length - 1];
-                                            prevElementScope = lastInPrevElement.getScope();
-
-                                            prevElement = lastInPrevElement;
-                                        }
-
-                                        moveControl.select(scope, prevElementScope);
-                                    } else {
-                                        // first node in array - should select its parent
-                                        moveControl.select(scope, parentScope);
-                                    }
-                                }
-                            },
-                            right: function (scope) {
-                                scope.$apply(function () {
-                                    scope.treedata.expanded = true;
-                                });
-                            },
-                            bottom: function (scope) {
-                                var node = scope.treedata,
-                                    parent = node.getParent(),
-                                    beforeParent,
-                                    nextElement, nextElementScope,
-                                    index;
-
-
-                                if (node.expanded && angular.isArray(node.subnodes) && typeof node.subnodes[0] !== 'undefined') {
-                                    /* node is:
-                                        - a directory
-                                        - expanded
-                                        - has a child
-                                    - so go to first child */
-
-                                    nextElement = node.subnodes[0];
-                                    nextElementScope = nextElement.getScope();
-
-                                    moveControl.select(scope, nextElementScope);
-                                } else {
-                                    index = parent.subnodes.indexOf(node);
-
-                                    if (index > -1) {
-                                        if (typeof parent.subnodes[index + 1] !== 'undefined') {
-                                            // node is not last in subnodes array
-
-                                            nextElement = parent.subnodes[index + 1];
-                                            nextElementScope = nextElement.getScope();
-
-                                            moveControl.select(scope, nextElementScope);
-                                        } else {
-                                            // it is the last node
-
-                                            do {
-                                                beforeParent = parent.getParent();
-
-                                                if (beforeParent !== null) {
-                                                    index = beforeParent.subnodes.indexOf(parent);
-
-                                                    parent = beforeParent;
-
-                                                    if (typeof beforeParent.subnodes[index + 1] !== 'undefined') {
-                                                        nextElement = beforeParent.subnodes[index + 1];
-                                                        nextElementScope = nextElement.getScope();
-                                                    }
-                                                }
-                                            } while (beforeParent !== null && typeof beforeParent.subnodes[index + 1] === 'undefined');
-
-                                            if (typeof nextElementScope !== 'undefined') {
-                                                moveControl.select(scope, nextElementScope);
-                                            }
-                                        }
-                                    }
-
-                                }
-                            }
-                        };
-
-//                        console.log('key', key);
-
-                        if ((key >= 37 && key <= 40) || key === 46) {
-                            scope = TreeviewManager.getSelectedNodeScope();
-
-                            switch (key) {
-                                case 37:
-                                    moveControl.left(scope);
-                                    break;
-                                case 38:
-                                    moveControl.top(scope);
-                                    break;
-                                case 39:
-                                    moveControl.right(scope);
-                                    break;
-                                case 40:
-                                    moveControl.bottom(scope);
-                                    break;
-                                case 46: // delete
-                                    scope.$removeNode();
-                                    break;
-                            }
-                        }
                     }
 
                     function mousedown (event) {
@@ -1008,38 +484,582 @@ angular.module('ioki.treeview', [
             }
         };
     }]);
+angular.module('ioki.treeview')
+    .provider('$treeview', function () {
+        'use strict';
+
+        var defaults = this.defaults = {
+                prefixEvent: 'treeview',
+                treesettings: {
+                    /* template URL */
+                    template: 'templates/ioki-treeview',
+
+                    /* define if user can expand / collapse nodes */
+                    expandable: true,
+
+                    /* define if all nodes should be expanded on loading the tree */
+                    expandAll: true,
+
+                    /* [optional] define how deep the tree should be expanded on load */
+                    // expandToLevel: [Number]
+
+                    /* define if user see expanders */
+                    showExpander: true,
+
+                    /* define if user can remove nodes */
+                    removable: false,
+
+                    /* define if user can add nodes */
+                    addable: true,
+
+                    /* define if user can select node */
+                    selectable: false,
+
+                    /* define if root node should be selected on load */
+                    rootSelected: false,
+
+                    /* treeview offers custom methods via controller's scope */
+                    customMethods: {
+                        /* addNode method */
+                        addNode: null,
+                        /* removeNode method */
+                        removeNode: null,
+                        /* method is called when node is started to drag (fire once) */
+                        dragStart: null,
+                        /* method is called when node is stopped to drag (fire once) */
+                        dragEnd: null,
+                        /* method is called when node is dragged */
+                        dragging: null,
+                        /* method is called when node is dropped */
+                        drop: null
+                    }
+                }
+            },
+            options = {};
+
+        this.$get = function ($q, TreeviewManager) {
+
+            function TreeViewFactory(config) {
+                var $treeview = {}, scope,
+                    prop;
+
+                /**
+                 * _Private Method isRootNode
+                 *
+                 * It defines if given scope is the root scope for treeview.
+                 *
+                 * @param scope             - Object    - scope of the node
+                 * @returns {boolean}       - Boolean   - returns true if node is root node
+                 * @private
+                 */
+                function _isRootNode(scope) {
+                    return typeof scope.$parent.$parent.treedata === 'undefined';
+                }
+
+                /**
+                 * _Private Method isNodeRemovable
+                 *
+                 * Is node removable is determine by global settings (options.settings.removable)
+                 * User also cannot remove Parent Node for whole TreeView
+                 *
+                 * @param scope             - Object    - scope of the node
+                 * @returns {boolean}       - Boolean   - returns true if node is removable
+                 * @private
+                 */
+
+                function _isNodeRemovable(scope) {
+                    return !(_isRootNode(scope) || !options.settings.removable);
+                }
+
+                /**
+                 * _Private Method configureScopeVars
+                 *
+                 * Method is configuring properties of node in scope.
+                 * Values depends on options provided by developer.
+                 *
+                 * @param scope             - Object    - scope of node
+                 * @param options           - Object    - options provided by developer
+                 * @private
+                 */
+                function _configureScopeVars(scope, options) {
+                    scope.treedata.$removable = _isNodeRemovable(scope);
+
+                    if (options.settings.expandAll && !scope.treedata.expandAllCalled) {
+                        scope.treedata.expanded = true;
+                        scope.treedata.expandAllCalled = true;
+                    }
+
+                    if (options.settings.rootSelected && _isRootNode(scope)) {
+                        scope.treedata.selected = true;
+                        TreeviewManager.setSelectedNode(scope);
+                    }
+                }
+
+                options = $treeview.$options = angular.extend({}, defaults, config);
+
+                /*
+                 copy defaults options for treeview (@var defaults)
+                 if option specific for instance (@var config) wasn't defined
+                 */
+                for (prop in defaults.treesettings) {
+                    if (defaults.treesettings.hasOwnProperty(prop)) {
+                        if (typeof config.settings[prop] === 'undefined') {
+                            options.settings[prop] = defaults.treesettings[prop];
+                        }
+                    }
+                }
+
+                scope = $treeview.$scope = options.scope;
+                scope.settings = options.settings;
+
+                _configureScopeVars(scope, options);
+
+                /**
+                 * INTERFACE for TreeView available in Controller's scope
+                 */
+
+                scope.$addNode = function (obj) {
+                    $treeview.addNode(obj);
+                };
+
+                scope.$removeNode = function () {
+                    $treeview.removeNode();
+                };
+
+                scope.$toggleNode = function () {
+                    $treeview.toggleNode();
+                };
+
+                scope.$selectNode = function (ev) {
+                    $treeview.selectNode(ev);
+                };
+
+                /***********************************************************************
+                 *
+                 * METHODS for TreeView
+                 *
+                 */
+
+                /**
+                 * Method toggleNode
+                 *  1) available in TreeView's scope
+                 *  2) requires property "expandable" in treesettings to be true
+                 *
+                 * This method change state "expanded" in current node for opposite state
+                 */
+                $treeview.toggleNode = function () {
+                    if (options.settings.expandable) {
+                        scope.treedata.expanded = !scope.treedata.expanded;
+                    }
+                };
+
+                /**
+                 * Method selectNode
+                 *  1) available in TreeView's scope
+                 *  2) requires property "selectable" in treesettings to be true
+                 *
+                 * This method mark current node as selected and unselect other nodes in TreeView
+                 * If selected node is the same as current node it will be unselect
+                 */
+                $treeview.selectNode = function (ev) {
+                    var state;
+
+                    if (options.settings.selectable) {
+                        if (typeof ev.target.attributes['ng-click'] !== 'undefined' && ev.target.attributes['ng-click'].value !== '$selectNode($event)') {
+                            setPropertyForAllNodes('selected', false);
+                            scope.treedata.selected = true;
+                        } else {
+                            // save actual state
+                            state = scope.treedata.selected;
+
+                            // unselect all nodes
+                            setPropertyForAllNodes('selected', false);
+
+                            // change state of clicked element on opposite state
+                            scope.treedata.selected = !state;
+                        }
+
+                        if (scope.treedata.selected) {
+                            TreeviewManager.setSelectedNode(scope);
+                        } else {
+                            TreeviewManager.unselectNode();
+                        }
+                    }
+                };
+
+                /**
+                 * Method addNode
+                 *  1) available in TreeView's scope
+                 *  2) requires property "addable" in treesettings to be true
+                 *  3) requires customMethod addNode to be function
+                 *
+                 * This method adds new node to subnodes for current node
+                 *
+                 * Method allows to use custom function for manage adding process.
+                 * It could be useful if developer want to implement pop-up or drop down with possibility
+                 * to choose what kind of node user want to add.
+                 *
+                 * @param obj               - Object - additional info / settings that might help with managing adding process
+                 */
+                $treeview.addNode = function (obj) {
+                    if (options.settings.addable) {
+                        if (typeof options.settings.customMethods.addNode === 'function') {
+                            options.settings.customMethods.addNode(scope, obj);
+                        }
+                    }
+                };
+
+                /**
+                 * Method removeNode
+                 *  1) available in TreeView's scope
+                 *  2) requires property "removable" in treesettings to be true
+                 *  3) (optionally) can use customMethod removeNode
+                 *
+                 * This method removes current node.
+                 */
+                $treeview.removeNode = function () {
+                    var deferred = $q.defer(),
+                        promise = deferred.promise;
+
+                    if (options.settings.removable) {
+                        if (angular.isFunction(options.settings.customMethods.removeNode)) {
+                            options.settings.customMethods.removeNode(scope, deferred);
+                        } else {
+                            deferred.resolve();
+                        }
+                    }
+
+                    promise.then(function (index) {
+                        removeNode(index);
+                    });
+                };
+
+                function removeNode (index) {
+                    var node = scope.treedata,
+                        parent = scope.getParent(),
+                        indexOfNode;
+
+                    if (parent !== null && angular.isArray(parent.treedata.subnodes)) {
+
+                        indexOfNode = index || parent.treedata.subnodes.indexOf(node);
+
+                        parent.treedata.subnodes.splice(indexOfNode, 1);
+                        parent.treedata.selected = true;
+
+                        if (node.selected) {
+                            TreeviewManager.setSelectedNode(parent);
+                        }
+                    }
+                }
+
+                /**
+                 * Function setPropertyForAllNodes
+                 *
+                 * Function sets given property (@param prop) with given value (@param value) for all nodes in tree
+                 *
+                 * @param prop              - String
+                 * @param value             - String / Number / Boolean
+                 */
+                function setPropertyForAllNodes(prop, value) {
+                    var rootScope, rootNode, subnodes;
+
+                    if (typeof prop === 'string' && typeof value !== 'undefined') {
+                        rootScope = getRootNode(scope);
+                        rootNode = rootScope.treedata;
+                        subnodes = rootNode.subnodes;
+
+                        rootNode[prop] = value;
+                        setPropertyForSubnodes(subnodes, prop, value);
+                    }
+                }
+
+                /**
+                 * Function setPropertyForSubnodes
+                 *
+                 * Recursive function for setting given property (@param prop) with given value (@param value) for nodes on the same level
+                 *
+                 * @param actualSubnodes    - Array (with objects)
+                 * @param prop              - String
+                 * @param value             - String / Number / Boolean
+                 */
+                function setPropertyForSubnodes(actualSubnodes, prop, value) {
+                    var i, arrLen;
+
+                    if (angular.isArray(actualSubnodes)) {
+                        i = 0;
+                        arrLen = actualSubnodes.length;
+
+                        for (i; i < arrLen; i++) {
+                            actualSubnodes[i][prop] = value;
+
+                            setPropertyForSubnodes(actualSubnodes[i].subnodes, prop, value);
+                        }
+                    }
+                }
+
+                /**
+                 * Function getRootNode
+                 *
+                 * Recursive function for finding the root scope in TreeView. Every node knows only about itself and subnodes.
+                 * This helper function helps to find root scope beginning from actual node and its scope (@param scope).
+                 *
+                 * @param scope             - Angular Scope Object
+                 * @returns {*}             - Angular Scope Object - RootScope of TreeView
+                 */
+                function getRootNode(scope) {
+                    if (_isRootNode(scope)) {
+                        return scope;
+                    } else {
+                        return getRootNode(scope.$parent.$parent);
+                    }
+                }
+
+                return $treeview;
+            }
+
+            return TreeViewFactory;
+        };
+    });
+angular.module('ioki.treeview')
+    .factory('TreeviewManager', ['$document', '$rootScope', function ($document, $rootScope) {
+        'use strict';
+
+        var keysManager, TreeviewManager;
+
+        TreeviewManager = {
+            /**
+             * DATA storage
+             *  For actually selected node or empty object if there is no selected node at the time.
+             *  selectedNode is a whole scope of selected node.
+             *  Object with data (like node name) is in selectedNode.treedata.
+             */
+            selectedNode: {},
+
+            /**
+             * Method selectNode
+             *
+             * Method selects new node and unselect previously selected.
+             *
+             * @param newScope              - Object
+             */
+            selectNode: function (newScope) {
+                newScope.$apply(function () {
+                    if (typeof TreeviewManager.selectedNode.treedata !== 'undefined') {
+                        TreeviewManager.selectedNode.treedata.selected = false;
+                    }
+                    newScope.treedata.selected = true;
+
+                    TreeviewManager.setSelectedNode(newScope);
+                });
+            },
+
+            /**
+             * Method setSelectedNode
+             *
+             * Method sets selectedNode as given in argument.
+             * It also broadcast newly selectedNode in whole application.
+             *
+             * @param selectedNodeScope      - Object
+             */
+            setSelectedNode: function (selectedNodeScope) {
+                TreeviewManager.selectedNode = selectedNodeScope;
+
+                $rootScope.$broadcast('treeview-selected', selectedNodeScope);
+            },
+
+            /**
+             * Method unselectNode
+             *
+             * Method sets actually selected node as empty object.
+             * It also broadcast empty selected node in whole application.
+             */
+            unselectNode: function () {
+                TreeviewManager.selectedNode = {};
+
+                $rootScope.$broadcast('treeview-unselected', {});
+            },
+
+            /**
+             * Methods for controlling treeview by keyboard
+             */
+            moveControl: {
+                /**
+                 * Method moveControl.left
+                 *
+                 * RESULT: close selected node
+                 */
+                left: function () {
+                    TreeviewManager.selectedNode.$apply(function () {
+                        TreeviewManager.selectedNode.treedata.expanded = false;
+                    });
+                },
+
+                /**
+                 * Method moveControl.right
+                 *
+                 * RESULT: open selected node
+                 */
+                right: function () {
+                    TreeviewManager.selectedNode.$apply(function () {
+                        TreeviewManager.selectedNode.treedata.expanded = true;
+                    });
+                },
+
+                /**
+                 * Method moveControl.top
+                 *
+                 * RESULT: go up in treeview structure
+                 *
+                 * FUNCTIONAL BEHAVIOUR:
+                 * New selected node could be (for selected node):
+                 *  - previous sibling
+                 *  - previous sibling's last child
+                 *  - parent
+                 */
+                top: function () {
+                    var node = TreeviewManager.selectedNode.treedata,
+                        parent = TreeviewManager.selectedNode.getParent(),
+                        index, prevElement, newSelectedNode, lastChildInPrevElement;
+
+                    if (parent !== null) {
+                        // node is not a root node
+                        index = parent.treedata.subnodes.indexOf(node);
+
+                        if (index > 0) {
+                            // node has a previous sibling
+
+                            prevElement = parent.treedata.subnodes[index - 1];
+                            newSelectedNode = prevElement.getScope();
+
+                            while (prevElement.expanded && typeof prevElement.subnodes !== 'undefined' && prevElement.subnodes.length > 0) {
+                                lastChildInPrevElement = prevElement.subnodes[prevElement.subnodes.length - 1];
+                                newSelectedNode = lastChildInPrevElement.getScope();
+
+                                prevElement = lastChildInPrevElement;
+                            }
+                        } else {
+                            // first node in array - should select its parent
+                            newSelectedNode = parent;
+                        }
+
+                        TreeviewManager.selectNode(newSelectedNode);
+                    }
+                },
+
+                /**
+                 * Method moveControl.bottom
+                 *
+                 * RESULT: go down in treeview structure
+                 *
+                 * FUNCTIONAL BEHAVIOUR:
+                 * New selected node could be (for selected node):
+                 *  - first child
+                 *  - next sibling
+                 */
+                bottom: function () {
+                    var node = TreeviewManager.selectedNode.treedata,
+                        parent = TreeviewManager.selectedNode.getParent(),
+                        index, nextElement, newSelectedNode, beforeParent;
+
+                    if (node.expanded && angular.isArray(node.subnodes) && typeof node.subnodes[0] !== 'undefined') {
+                        /* node is:
+                         - a directory
+                         - expanded
+                         - has a child
+                         ** so go to first child */
+
+                        nextElement = node.subnodes[0];
+                        newSelectedNode = nextElement.getScope(nextElement);
+
+                        TreeviewManager.selectNode(newSelectedNode);
+                    } else if (parent !== null) {
+                        index = parent.treedata.subnodes.indexOf(node);
+
+                        if (typeof parent.treedata.subnodes[index + 1] !== 'undefined') {
+                            // node is not last in subnodes array
+
+                            nextElement = parent.treedata.subnodes[index + 1];
+                            newSelectedNode = nextElement.getScope();
+                        } else {
+                            // it is the last node
+                            do {
+                                beforeParent = parent.getParent();
+
+                                if (beforeParent !== null) {
+                                    index = beforeParent.treedata.subnodes.indexOf(parent.treedata);
+
+                                    parent = beforeParent;
+
+                                    if (typeof beforeParent.treedata.subnodes[index + 1] !== 'undefined') {
+                                        nextElement = beforeParent.treedata.subnodes[index + 1];
+                                        newSelectedNode = nextElement.getScope();
+                                    }
+                                }
+                            } while (beforeParent !== null && typeof beforeParent.treedata.subnodes[index + 1] === 'undefined');
+                        }
+
+                        if (typeof newSelectedNode !== 'undefined') {
+                            TreeviewManager.selectNode(newSelectedNode);
+                        }
+                    }
+                },
+
+                /**
+                 * Method moveControl.delete
+                 *
+                 * Method calls another method for removing selected node.
+                 */
+                'delete': function () {
+                    TreeviewManager.selectedNode.$removeNode();
+                }
+            }
+        };
+
+        keysManager = {
+            '37': TreeviewManager.moveControl.left,
+            '38': TreeviewManager.moveControl.top,
+            '39': TreeviewManager.moveControl.right,
+            '40': TreeviewManager.moveControl.bottom,
+            '46': TreeviewManager.moveControl.delete
+        };
+
+        $document.on('keydown', function (ev) {
+            var key = ev.keyCode;
+
+            if (angular.isFunction(keysManager[key])) {
+                keysManager[key]();
+            }
+        });
+
+        return TreeviewManager;
+    }]);
 angular.module('ioki.treeview').run(['$templateCache', function($templateCache) {
   'use strict';
 
   $templateCache.put('templates/ioki-treeview',
-    "<div bindonce\n" +
-    "     ng-class=\"{'expanded': treedata.expanded, 'selected': treedata.selected, 'dir': treedata.subnodes}\"\n" +
+    "<div ng-class=\"{'expanded': treedata.expanded, 'selected': treedata.selected, 'dir': treedata.subnodes}\"\n" +
     "     ng-click=\"$selectNode($event)\">\n" +
     "\n" +
     "    <!-- expander icon -->\n" +
-    "    <i class=\"expander\"\n" +
-    "       bo-class=\"settings.iconsBaseClass\"\n" +
+    "    <i class=\"fa expander\"\n" +
     "       ng-click=\"$toggleNode()\"></i>\n" +
     "\n" +
     "    <!-- node icon -->\n" +
-    "    <i class=\"node-icon\"\n" +
-    "       bo-class=\"settings.iconsBaseClass\"></i>\n" +
+    "    <i class=\"fa node-icon\"></i>\n" +
     "\n" +
     "    <!-- node label -->\n" +
     "    <span class=\"node-label\" ng-bind=\"treedata.name\"></span>\n" +
     "\n" +
     "    <!-- remove node icon -->\n" +
-    "    <i class=\"remove-node\"\n" +
-    "       bo-class=\"settings.iconsBaseClass\"\n" +
+    "    <i class=\"fa remove-node\"\n" +
     "       ng-click=\"$removeNode()\"></i>\n" +
     "\n" +
     "    <!-- add node icon -->\n" +
-    "    <i class=\"add-node\"\n" +
-    "       bo-class=\"settings.iconsBaseClass\"\n" +
+    "    <i class=\"fa add-node\"\n" +
     "       ng-click=\"$addNode()\"></i>\n" +
     "</div>\n" +
     "<ul ng-if=\"treedata.subnodes && treedata.expanded\">\n" +
-    "    <li ng-repeat=\"subnode in treedata.subnodes track by $index\">\n" +
+    "    <li ng-repeat=\"subnode in treedata.subnodes track by subnode.id\">\n" +
     "        <treeview treedata=\"subnode\"></treeview>\n" +
     "    </li>\n" +
     "</ul>"
