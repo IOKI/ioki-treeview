@@ -91,13 +91,18 @@ angular.module('ioki.treeview', [
                             isDroppable:    false
                         };
 
+                    /*
+                        Copy settings given by user to nested nodes. Cache them in settings object.
+                     */
                     if (typeof scope.treesettings !== 'undefined') {
                         angular.copy(scope.treesettings, settings);
                     }
-
                     scope.settings = settings;
 
-                    // Expand to given Level
+                    /*
+                        Add levels indicators to nested subtrees.
+                        Expand treeview to given level if there is a need.
+                     */
                     if (angular.isNumber(settings.expandToLevel)) {
                         if (typeof scope.$parent.treedata === 'undefined') {
                             scope.treedata.level = 1;
@@ -108,14 +113,34 @@ angular.module('ioki.treeview', [
                         scope.treedata.expanded = (scope.treedata.level < settings.expandToLevel);
                     }
 
-                    // Method getParent
+                    /*
+                        Initialization phase callback.
+                     */
+
+                    if (angular.isFunction(scope.settings.customMethods.init)) {
+                        scope.settings.customMethods.init(scope, element);
+                    }
+
+                    /**
+                     * Method getParent
+                     *
+                     * Method returns parent's scope of node or null if parent's scope is out of treeview.
+                     *
+                     * @returns {parent | null}         - Object / null - Parent's scope or null
+                     */
                     scope.getParent = function () {
                         var parent = scope.$parent.$parent;
 
                         return (typeof parent.treedata !== 'undefined') ? parent : null;
                     };
 
-                    // Method getScope
+                    /**
+                     * Method treedata.getScope
+                     *
+                     * Method returns scope of node.
+                     *
+                     * @returns {*}                     - Object    - Scope object
+                     */
                     scope.treedata.getScope = function () {
                         return scope;
                     };
@@ -175,7 +200,7 @@ angular.module('ioki.treeview', [
                         isMoving = false;
                     }
 
-                    function mousemove(event) {
+                    function mousemove (event) {
                         var elementWidth,
                             x = event.pageX + 10,
                             y = event.pageY + 10;
@@ -531,7 +556,9 @@ angular.module('ioki.treeview')
                         /* method is called when node is dragged */
                         dragging: null,
                         /* method is called when node is dropped */
-                        drop: null
+                        drop: null,
+                        /* init method is called when node is initialised */
+                        init: null
                     }
                 }
             },
@@ -1037,7 +1064,11 @@ angular.module('ioki.treeview').run(['$templateCache', function($templateCache) 
   'use strict';
 
   $templateCache.put('templates/ioki-treeview',
-    "<div ng-class=\"{'expanded': treedata.expanded, 'selected': treedata.selected, 'dir': treedata.subnodes}\"\n" +
+    "<div ng-class=\"{\n" +
+    "        'expanded': treedata.expanded,\n" +
+    "        'selected': treedata.selected,\n" +
+    "        'dir': treedata.subnodes\n" +
+    "     }\"\n" +
     "     ng-click=\"$selectNode($event)\">\n" +
     "\n" +
     "    <!-- expander icon -->\n" +

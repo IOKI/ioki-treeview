@@ -73,7 +73,6 @@ angular.module('app').controller('WorkareaController', ['$scope', '$modal', '$tr
         rootSelected: true,
         expandAll: false,
 
-        iconsBaseClass: 'fa',
         icons: {
             'directory': {
                 closed: 'fa-folder-o',
