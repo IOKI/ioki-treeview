@@ -3,7 +3,7 @@ ioki-treeview
 
 TreeView component for AngularJS. Developed by IOKI Team.
 
-Current Version: 0.1.22
+Current Version: 0.1.23
 
 TreeView is currently under huge development. API may change at any release. Please consider it while doing upgrade to newer version.
 
