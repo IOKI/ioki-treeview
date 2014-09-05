@@ -125,6 +125,8 @@ angular.module('ioki.treeview', [
                     }
 
                     function mousedown (event) {
+                        var allowDragStart = scope.settings.customMethods.allowDragStart;
+
                         /*  allow drag if:
                          - clicked element does not have any other action bind to it
                          - user use left mouse button
@@ -134,19 +136,21 @@ angular.module('ioki.treeview', [
                             event.preventDefault();
                             event.stopPropagation();
 
-                            // get root element and cache it
-                            if (typeof rootParent.el === 'undefined') {
-                                rootParent = getTreeViewParent(element);
+                            if (typeof allowDragStart === 'undefined' || (angular.isFunction(allowDragStart) && allowDragStart(scope))) {
+                                // get root element and cache it
+                                if (typeof rootParent.el === 'undefined') {
+                                    rootParent = getTreeViewParent(element);
+                                }
+
+                                // calculate position on the screen for element
+                                startX = event.pageX - element[0].offsetLeft;
+                                startY = event.pageY - element[0].offsetTop;
+
+                                // set events for $document
+                                $document
+                                    .on('mousemove touchmove', mousemove)
+                                    .on('mouseup touchend', mouseup);
                             }
-
-                            // calculate position on the screen for element
-                            startX = event.pageX - element[0].offsetLeft;
-                            startY = event.pageY - element[0].offsetTop;
-
-                            // set events for $document
-                            $document
-                                .on('mousemove touchmove', mousemove)
-                                .on('mouseup touchend', mouseup);
                         }
 
                         isMoving = false;

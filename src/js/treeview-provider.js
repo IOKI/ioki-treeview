@@ -47,7 +47,9 @@ angular.module('ioki.treeview')
                         /* method is called when node is dropped */
                         drop: null,
                         /* init method is called when node is initialised */
-                        init: null
+                        init: null,
+                        /* method is called before drag start (fire once) */
+                        allowDragStart: null
                     }
                 }
             },
