@@ -1095,8 +1095,8 @@ angular.module('ioki.treeview').run(['$templateCache', function($templateCache) 
     "    <i class=\"fa add-node\"\n" +
     "       ng-click=\"$addNode()\"></i>\n" +
     "</div>\n" +
-    "<ul ng-if=\"treedata.subnodes && treedata.expanded\">\n" +
-    "    <li ng-repeat=\"subnode in treedata.subnodes track by subnode.id\">\n" +
+    "<ul>\n" +
+    "    <li ng-repeat=\"subnode in treedata.subnodes track by subnode.id\" ng-if=\"treedata.subnodes && treedata.expanded\">\n" +
     "        <treeview treedata=\"subnode\"></treeview>\n" +
     "    </li>\n" +
     "</ul>"
