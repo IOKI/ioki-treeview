@@ -23,8 +23,8 @@
     <i class="fa add-node"
        ng-click="$addNode()"></i>
 </div>
-<ul ng-if="treedata.subnodes && treedata.expanded">
-    <li ng-repeat="subnode in treedata.subnodes track by subnode.id">
+<ul>
+    <li ng-repeat="subnode in treedata.subnodes track by subnode.id" ng-if="treedata.subnodes && treedata.expanded">
         <treeview treedata="subnode"></treeview>
     </li>
 </ul>
