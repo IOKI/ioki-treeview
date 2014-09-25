@@ -32,6 +32,9 @@ angular.module('ioki.treeview')
                     /* define if root node should be selected on load */
                     rootSelected: false,
 
+                    /* define if nodes are draggable or not */
+                    draggable: true,
+
                     /* treeview offers custom methods via controller's scope */
                     customMethods: {
                         /* addNode method */

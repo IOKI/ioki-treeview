@@ -165,7 +165,7 @@ angular.module('ioki.treeview', [
                     /*
                      Events for Drag & Drop functionality
                      */
-                    if (element.attr('treeview-element-type') !== 'root') {
+                    if (element.attr('treeview-element-type') !== 'root' && scope.settings.draggable) {
                         element.on('mousedown touchstart', mousedown);
                     } else {
                         if (options.settings.showExpander)  { element.addClass('show-expander');    }
@@ -547,6 +547,9 @@ angular.module('ioki.treeview')
 
                     /* define if root node should be selected on load */
                     rootSelected: false,
+
+                    /* define if nodes are draggable or not */
+                    draggable: true,
 
                     /* treeview offers custom methods via controller's scope */
                     customMethods: {
