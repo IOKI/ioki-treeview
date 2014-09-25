@@ -1,51 +1,52 @@
-angular.module('RecursionHelper', []).factory('RecursionHelper', ['$compile', function($compile){
-    'use strict';
+angular.module('RecursionHelper', [])
+    .factory('RecursionHelper', ['$compile', function ($compile) {
+        'use strict';
 
-    /*
-     * An Angular service which helps with creating recursive directives.
-     * @author Mark Lagendijk
-     * @license MIT
-     */
-    return {
-        /**
-         * Manually compiles the element, fixing the recursion loop.
-         * @param element
-         * @param [link] A post-link function, or an object with function(s) registered via pre and post properties.
-         * @returns An object containing the linking functions.
+        /*
+         * An Angular service which helps with creating recursive directives.
+         * @author Mark Lagendijk
+         * @license MIT
          */
-        compile: function(element, link){
-            // Normalize the link parameter
-            if(angular.isFunction(link)){
-                link = { post: link };
-            }
-
-            // Break the recursion loop by removing the contents
-            var contents = element.contents().remove();
-            var compiledContents;
-            return {
-                pre: (link && link.pre) ? link.pre : null,
-                /**
-                 * Compiles and re-adds the contents
-                 */
-                post: function(scope, element){
-                    // Compile the contents
-                    if(!compiledContents){
-                        compiledContents = $compile(contents);
-                    }
-                    // Re-add the compiled contents to the element
-                    compiledContents(scope, function(clone){
-                        element.append(clone);
-                    });
-
-                    // Call the post-linking function, if any
-                    if(link && link.post){
-                        link.post.apply(null, arguments);
-                    }
+        return {
+            /**
+             * Manually compiles the element, fixing the recursion loop.
+             * @param element
+             * @param [link] A post-link function, or an object with function(s) registered via pre and post properties.
+             * @returns An object containing the linking functions.
+             */
+            compile: function (element, link) {
+                // Normalize the link parameter
+                if (angular.isFunction(link)) {
+                    link = { post: link };
                 }
-            };
-        }
-    };
-}]);
+
+                // Break the recursion loop by removing the contents
+                var contents = element.contents().remove();
+                var compiledContents;
+                return {
+                    pre: (link && link.pre) ? link.pre : null,
+                    /**
+                     * Compiles and re-adds the contents
+                     */
+                    post: function (scope, element) {
+                        // Compile the contents
+                        if (!compiledContents) {
+                            compiledContents = $compile(contents);
+                        }
+                        // Re-add the compiled contents to the element
+                        compiledContents(scope, function (clone) {
+                            element.append(clone);
+                        });
+
+                        // Call the post-linking function, if any
+                        if (link && link.post) {
+                            link.post.apply(null, arguments);
+                        }
+                    }
+                };
+            }
+        };
+    }]);
 angular.module('ioki.treeview', [
         'RecursionHelper'
     ])
@@ -117,7 +118,7 @@ angular.module('ioki.treeview', [
                         Initialization phase callback.
                      */
 
-                    if (angular.isFunction(scope.settings.customMethods.init)) {
+                    if (typeof scope.settings.customMethods !== 'undefined' && angular.isFunction(scope.settings.customMethods.init)) {
                         scope.settings.customMethods.init(scope, element);
                     }
 
@@ -239,7 +240,7 @@ angular.module('ioki.treeview', [
                                     width:  elementWidth            + 'px'
                                 });
 
-                            if (typeof scope.settings.customMethods.dragStart === 'function') {
+                            if (typeof scope.settings.customMethods === 'undefined' && angular.isFunction(scope.settings.customMethods.dragStart)) {
                                 scope.settings.customMethods.dragStart(rootParent, scope, element);
                             }
 
@@ -354,7 +355,7 @@ angular.module('ioki.treeview', [
                             }
                         }
 
-                        if (typeof scope.settings.customMethods.dragging === 'function') {
+                        if (typeof scope.settings.customMethods !== 'undefined' && angular.isFunction(scope.settings.customMethods.dragging)) {
                             scope.settings.customMethods.dragging(rootParent, scope, target, element);
                         }
                     }
@@ -423,13 +424,13 @@ angular.module('ioki.treeview', [
                                 /*  Custom method for DRAG END
                                  If there is no any custom method for Drag End - resolve promise and finalize dropping action
                                  */
-                                if (typeof scope.settings.customMethods.dragEnd === 'function') {
+                                if (typeof scope.settings.customMethods === 'undefined' && angular.isFunction(scope.settings.customMethods.dragEnd)) {
                                     scope.settings.customMethods.dragEnd(target.isDroppable, rootParent, scope, target, deferred);
                                 } else {
                                     deferred.resolve(elementIndexToAdd);
                                 }
                             } else {
-                                if (typeof scope.settings.customMethods.dragEnd === 'function') {
+                                if (typeof scope.settings.customMethods === 'undefined' && angular.isFunction(scope.settings.customMethods.dragEnd)) {
                                     scope.settings.customMethods.dragEnd(target.isDroppable, rootParent, scope, target, deferred);
                                 }
                             }
@@ -564,13 +565,13 @@ angular.module('ioki.treeview')
                         /* init method is called when node is initialised */
                         init: null,
                         /* method is called before drag start (fire once) */
-                        allowDragStart: null
+                        allowDragStart: function () { return true; }
                     }
                 }
             },
             options = {};
 
-        this.$get = function ($q, TreeviewManager) {
+        this.$get = ['$q', 'TreeviewManager', function ($q, TreeviewManager) {
 
             function TreeViewFactory(config) {
                 var $treeview = {}, scope,
@@ -851,7 +852,7 @@ angular.module('ioki.treeview')
             }
 
             return TreeViewFactory;
-        };
+        }];
     });
 angular.module('ioki.treeview')
     .factory('TreeviewManager', ['$document', '$rootScope', function ($document, $rootScope) {
@@ -1105,7 +1106,7 @@ angular.module('ioki.treeview').run(['$templateCache', function($templateCache) 
 }]);
 
 angular.module('ioki.treeview')
-    .filter('getNodeIcon', function() {
+    .filter('getNodeIcon', function () {
         'use strict';
 
         /**
@@ -1125,7 +1126,7 @@ angular.module('ioki.treeview')
             /* IF Statement
                 node.type should be a string and has representation on icons schema
              */
-            if (typeof node.type === 'string' && typeof icons[node.type] !== 'undefined'){
+            if (typeof node.type === 'string' && typeof icons[node.type] !== 'undefined') {
                 icon = icons[node.type];
 
                 /* IF Statement
@@ -1136,7 +1137,7 @@ angular.module('ioki.treeview')
                 if (icon !== null && typeof icon === 'object') {
                     node.expanded = node.expanded || false;
 
-                    if (node.expanded){
+                    if (node.expanded) {
                         return icon.open;
                     } else {
                         return icon.closed;

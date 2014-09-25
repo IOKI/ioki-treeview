@@ -55,7 +55,7 @@ module.exports = function(grunt) {
                 dest: 'ioki-treeview.js'
             }
         },
-        ngmin: {
+        ngAnnotate: {
             release: {
                 src: ['ioki-treeview.js'],
                 dest: 'ioki-treeview.min.js'
@@ -142,7 +142,7 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-connect');
     grunt.loadNpmTasks('grunt-contrib-copy');
     grunt.loadNpmTasks('grunt-contrib-concat');
-    grunt.loadNpmTasks('grunt-ngmin');
+    grunt.loadNpmTasks('grunt-ng-annotate');
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-contrib-cssmin');
     grunt.loadNpmTasks('grunt-angular-templates');
@@ -150,7 +150,7 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-concurrent');
 
     grunt.registerTask('test', ['jshint']);
-    grunt.registerTask('release', ['test', 'copy', 'ngtemplates', 'concat', 'ngmin', 'uglify', 'cssmin']);
+    grunt.registerTask('release', ['test', 'copy', 'ngtemplates', 'concat', 'ngAnnotate', 'uglify', 'cssmin']);
     grunt.registerTask('serve', ['concurrent:server']);
     grunt.registerTask('build', ['jshint', 'compass']);
 

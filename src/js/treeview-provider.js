@@ -49,13 +49,13 @@ angular.module('ioki.treeview')
                         /* init method is called when node is initialised */
                         init: null,
                         /* method is called before drag start (fire once) */
-                        allowDragStart: null
+                        allowDragStart: function () { return true; }
                     }
                 }
             },
             options = {};
 
-        this.$get = function ($q, TreeviewManager) {
+        this.$get = ['$q', 'TreeviewManager', function ($q, TreeviewManager) {
 
             function TreeViewFactory(config) {
                 var $treeview = {}, scope,
@@ -336,5 +336,5 @@ angular.module('ioki.treeview')
             }
 
             return TreeViewFactory;
-        };
+        }];
     });

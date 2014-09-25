@@ -1,5 +1,5 @@
 angular.module('ioki.treeview')
-    .filter('getNodeIcon', function() {
+    .filter('getNodeIcon', function () {
         'use strict';
 
         /**
@@ -19,7 +19,7 @@ angular.module('ioki.treeview')
             /* IF Statement
                 node.type should be a string and has representation on icons schema
              */
-            if (typeof node.type === 'string' && typeof icons[node.type] !== 'undefined'){
+            if (typeof node.type === 'string' && typeof icons[node.type] !== 'undefined') {
                 icon = icons[node.type];
 
                 /* IF Statement
@@ -30,7 +30,7 @@ angular.module('ioki.treeview')
                 if (icon !== null && typeof icon === 'object') {
                     node.expanded = node.expanded || false;
 
-                    if (node.expanded){
+                    if (node.expanded) {
                         return icon.open;
                     } else {
                         return icon.closed;

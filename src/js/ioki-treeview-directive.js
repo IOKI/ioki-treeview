@@ -69,7 +69,7 @@ angular.module('ioki.treeview', [
                         Initialization phase callback.
                      */
 
-                    if (angular.isFunction(scope.settings.customMethods.init)) {
+                    if (typeof scope.settings.customMethods !== 'undefined' && angular.isFunction(scope.settings.customMethods.init)) {
                         scope.settings.customMethods.init(scope, element);
                     }
 
@@ -191,7 +191,7 @@ angular.module('ioki.treeview', [
                                     width:  elementWidth            + 'px'
                                 });
 
-                            if (typeof scope.settings.customMethods.dragStart === 'function') {
+                            if (typeof scope.settings.customMethods === 'undefined' && angular.isFunction(scope.settings.customMethods.dragStart)) {
                                 scope.settings.customMethods.dragStart(rootParent, scope, element);
                             }
 
@@ -306,7 +306,7 @@ angular.module('ioki.treeview', [
                             }
                         }
 
-                        if (typeof scope.settings.customMethods.dragging === 'function') {
+                        if (typeof scope.settings.customMethods !== 'undefined' && angular.isFunction(scope.settings.customMethods.dragging)) {
                             scope.settings.customMethods.dragging(rootParent, scope, target, element);
                         }
                     }
@@ -375,13 +375,13 @@ angular.module('ioki.treeview', [
                                 /*  Custom method for DRAG END
                                  If there is no any custom method for Drag End - resolve promise and finalize dropping action
                                  */
-                                if (typeof scope.settings.customMethods.dragEnd === 'function') {
+                                if (typeof scope.settings.customMethods === 'undefined' && angular.isFunction(scope.settings.customMethods.dragEnd)) {
                                     scope.settings.customMethods.dragEnd(target.isDroppable, rootParent, scope, target, deferred);
                                 } else {
                                     deferred.resolve(elementIndexToAdd);
                                 }
                             } else {
-                                if (typeof scope.settings.customMethods.dragEnd === 'function') {
+                                if (typeof scope.settings.customMethods === 'undefined' && angular.isFunction(scope.settings.customMethods.dragEnd)) {
                                     scope.settings.customMethods.dragEnd(target.isDroppable, rootParent, scope, target, deferred);
                                 }
                             }
