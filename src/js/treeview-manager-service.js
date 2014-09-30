@@ -198,7 +198,7 @@ angular.module('ioki.treeview')
             '38': TreeviewManager.moveControl.top,
             '39': TreeviewManager.moveControl.right,
             '40': TreeviewManager.moveControl.bottom,
-            '46': TreeviewManager.moveControl.delete
+            '46': TreeviewManager.moveControl['delete']
         };
 
         $document.on('keydown', function (ev) {
