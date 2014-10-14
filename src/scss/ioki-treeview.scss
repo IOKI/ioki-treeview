@@ -1,5 +1,25 @@
 @import 'compass';
 
+/* Customization - icons */
+$icon-expander-closed:          "\f0da";        // fa-caret-right
+$icon-expander-open:            "\f0d7";        // fa-caret-down
+$icon-add-node:                 "\f055";        // fa-plus-circle
+$icon-remove-node:              "\f056";        // fa-minus-circle
+$icon-node-as-leaf:             "\f016";        // fa-file-o
+$icon-node-as-dir-closed:       "\f114";        // fa-folder-o
+$icon-node-as-dir-open:         "\f115";        // fa-folder-open-o
+
+/* Customization - colors */
+$color-expander-closed:         #949494;
+$color-expander-open:           #000;
+$color-add-node:                forestgreen;
+$color-remove-node:             darkred;
+
+/* Customization - states - selected */
+$node-selected-color:           #fff;
+$node-selected-bg-color:        #006da4;
+$node-selected-icons-colors:    #fff;
+
 treeview {
     display: block;
 
@@ -9,10 +29,10 @@ treeview {
         width: 13px;
         padding-right: 5px;
         cursor: pointer;
-        color: #949494;
+        color: $color-expander-closed;
 
         &:before {
-            content: "\f0da";       // fa-caret-right
+            content: $icon-expander-closed;
         }
     }
 
@@ -35,16 +55,16 @@ treeview {
 
     .add-node {
         visibility: hidden;
-        color: forestgreen;
+        color: $color-add-node;
         &:before {
-            content: "\f055";       // fa-plus-circle
+            content: $icon-add-node;
         }
     }
 
     .remove-node {
-        color: darkred;
+        color: $color-remove-node;
         &:before {
-            content: "\f056";       // fa-minus-circle
+            content: $icon-remove-node;
         }
     }
 
@@ -60,68 +80,73 @@ treeview {
         }
     }
 
-    &[treeview-element-type="root"] > div > .remove-node  {
+    &[treeview-element-type="root"] > treeview-node > treeview-node-body .remove-node  {
         visibility: hidden;
     }
     /* REMOVE AND ADD NODE END */
 
-    > div {
-        padding: 0px 2px 0px 6px;
-        border-radius: 2px;
+    > treeview-node {
+        display: block;
 
-        .node-icon:before {
-            content: "\f016";           // .fa-file-o
-        }
-
-        &.dir {
-            .add-node {
-                visibility: visible;
-            }
+        treeview-node-body {
+            display: block;
+            padding: 0px 2px 0px 6px;
+            border-radius: 2px;
 
             .node-icon:before {
-                content: "\f114";       // .fa-folder-o
+                content: $icon-node-as-leaf;
             }
 
-            &.expanded {
-                .node-icon:before {
-                    content: "\f115";   // .fa-folder-open-o
-                }
-
-                .expander {
+            &.dir {
+                .add-node {
                     visibility: visible;
-                    color: #000;
-
-                    &:before {
-                        content: "\f0d7";       // fa-caret-down
-                    }
                 }
 
-                &+ul {
-                    display: block;
+                .node-icon:before {
+                    content: $icon-node-as-dir-closed;
+                }
 
-                    > div .expander {
-                        color: #000;
+                &.expanded {
+                    .node-icon:before {
+                        content: $icon-node-as-dir-open;
+                    }
+
+                    .expander {
+                        visibility: visible;
+                        color: $color-expander-open;
+
+                        &:before {
+                            content: $icon-expander-open;
+                        }
+                    }
+
+                    &+ul {
+                        display: block;
+
+                        > treeview-node > treeview-node-body .expander {
+                            color: $color-expander-open;
+                        }
                     }
                 }
             }
-        }
 
-        span.node-label {
-            display: inline-block;
-            padding: 2px 0px;
-        }
+            span.node-label {
+                display: inline-block;
+                padding: 2px 0px;
+            }
 
-        &:hover, &.selected {
-            color: #fff;
-            background: #006da4;
+            &:hover, &.selected {
+                color: $node-selected-color;
+                background: $node-selected-bg-color;
 
-            .add-node, .remove-node, .expander {
-                color: #fff;
+                .add-node, .remove-node, .expander, &.dir.expanded .expander {
+                    color: $node-selected-icons-colors;
+                }
             }
         }
     }
 
-    > ul {
+    > treeview-node ul {
         padding-left: 10px;
         display: none;
         list-style-type: none;
@@ -143,7 +168,7 @@ treeview {
         cursor: pointer;
 
         .dropToDir {
-            > div {
+            > treeview-node > treeview-node-body {
                 span.node-label {
                     background: #ccc;
                 }
@@ -155,7 +180,7 @@ treeview {
         position: absolute;
         cursor: pointer;
 
-        > div {
+        > treeview-node > treeview-node-body {
             color: #000;
             background-color: #fff;
             opacity: .75;

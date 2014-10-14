@@ -1,4 +1,8 @@
-/* line 3, ../../src/scss/ioki-treeview.scss */
+@charset "UTF-8";
+/* Customization - icons */
+/* Customization - colors */
+/* Customization - states - selected */
+/* line 23, ../../src/scss/ioki-treeview.scss */
 treeview {
   display: block;
   /* EXPANDER START */
@@ -6,7 +10,7 @@ treeview {
   /* REMOVE AND ADD NODE START */
   /* REMOVE AND ADD NODE END */
 }
-/* line 7, ../../src/scss/ioki-treeview.scss */
+/* line 27, ../../src/scss/ioki-treeview.scss */
 treeview .expander {
   visibility: hidden;
   width: 13px;
@@ -14,110 +18,115 @@ treeview .expander {
   cursor: pointer;
   color: #949494;
 }
-/* line 14, ../../src/scss/ioki-treeview.scss */
+/* line 34, ../../src/scss/ioki-treeview.scss */
 treeview .expander:before {
-  content: "\f0da";
+  content: "";
 }
-/* line 21, ../../src/scss/ioki-treeview.scss */
+/* line 41, ../../src/scss/ioki-treeview.scss */
 treeview.show-expander .dir .expander {
   visibility: visible;
 }
-/* line 29, ../../src/scss/ioki-treeview.scss */
+/* line 49, ../../src/scss/ioki-treeview.scss */
 treeview .add-node, treeview .remove-node {
   margin-right: 15px;
   float: right;
   cursor: pointer;
   line-height: 20px;
 }
-/* line 36, ../../src/scss/ioki-treeview.scss */
+/* line 56, ../../src/scss/ioki-treeview.scss */
 treeview .add-node {
   visibility: hidden;
   color: forestgreen;
 }
-/* line 39, ../../src/scss/ioki-treeview.scss */
+/* line 59, ../../src/scss/ioki-treeview.scss */
 treeview .add-node:before {
-  content: "\f055";
+  content: "";
 }
-/* line 44, ../../src/scss/ioki-treeview.scss */
+/* line 64, ../../src/scss/ioki-treeview.scss */
 treeview .remove-node {
   color: darkred;
 }
-/* line 46, ../../src/scss/ioki-treeview.scss */
+/* line 66, ../../src/scss/ioki-treeview.scss */
 treeview .remove-node:before {
-  content: "\f056";
+  content: "";
 }
-/* line 52, ../../src/scss/ioki-treeview.scss */
+/* line 72, ../../src/scss/ioki-treeview.scss */
 treeview.unremovable .remove-node {
   visibility: hidden;
 }
-/* line 58, ../../src/scss/ioki-treeview.scss */
+/* line 78, ../../src/scss/ioki-treeview.scss */
 treeview.unaddable .add-node {
   visibility: hidden;
 }
-/* line 63, ../../src/scss/ioki-treeview.scss */
-treeview[treeview-element-type="root"] > div > .remove-node {
+/* line 83, ../../src/scss/ioki-treeview.scss */
+treeview[treeview-element-type="root"] > treeview-node > treeview-node-body .remove-node {
   visibility: hidden;
 }
-/* line 68, ../../src/scss/ioki-treeview.scss */
-treeview > div {
+/* line 88, ../../src/scss/ioki-treeview.scss */
+treeview > treeview-node {
+  display: block;
+}
+/* line 91, ../../src/scss/ioki-treeview.scss */
+treeview > treeview-node treeview-node-body {
+  display: block;
   padding: 0px 2px 0px 6px;
   border-radius: 2px;
 }
-/* line 72, ../../src/scss/ioki-treeview.scss */
-treeview > div .node-icon:before {
-  content: "\f016";
+/* line 96, ../../src/scss/ioki-treeview.scss */
+treeview > treeview-node treeview-node-body .node-icon:before {
+  content: "";
 }
-/* line 77, ../../src/scss/ioki-treeview.scss */
-treeview > div.dir .add-node {
+/* line 101, ../../src/scss/ioki-treeview.scss */
+treeview > treeview-node treeview-node-body.dir .add-node {
   visibility: visible;
 }
-/* line 81, ../../src/scss/ioki-treeview.scss */
-treeview > div.dir .node-icon:before {
-  content: "\f114";
+/* line 105, ../../src/scss/ioki-treeview.scss */
+treeview > treeview-node treeview-node-body.dir .node-icon:before {
+  content: "";
 }
-/* line 86, ../../src/scss/ioki-treeview.scss */
-treeview > div.dir.expanded .node-icon:before {
-  content: "\f115";
+/* line 110, ../../src/scss/ioki-treeview.scss */
+treeview > treeview-node treeview-node-body.dir.expanded .node-icon:before {
+  content: "";
 }
-/* line 90, ../../src/scss/ioki-treeview.scss */
-treeview > div.dir.expanded .expander {
+/* line 114, ../../src/scss/ioki-treeview.scss */
+treeview > treeview-node treeview-node-body.dir.expanded .expander {
   visibility: visible;
   color: #000;
 }
-/* line 94, ../../src/scss/ioki-treeview.scss */
-treeview > div.dir.expanded .expander:before {
-  content: "\f0d7";
+/* line 118, ../../src/scss/ioki-treeview.scss */
+treeview > treeview-node treeview-node-body.dir.expanded .expander:before {
+  content: "";
 }
-/* line 99, ../../src/scss/ioki-treeview.scss */
-treeview > div.dir.expanded + ul {
+/* line 123, ../../src/scss/ioki-treeview.scss */
+treeview > treeview-node treeview-node-body.dir.expanded + ul {
   display: block;
 }
-/* line 102, ../../src/scss/ioki-treeview.scss */
-treeview > div.dir.expanded + ul > div .expander {
+/* line 126, ../../src/scss/ioki-treeview.scss */
+treeview > treeview-node treeview-node-body.dir.expanded + ul > treeview-node > treeview-node-body .expander {
   color: #000;
 }
-/* line 109, ../../src/scss/ioki-treeview.scss */
-treeview > div span.node-label {
+/* line 133, ../../src/scss/ioki-treeview.scss */
+treeview > treeview-node treeview-node-body span.node-label {
   display: inline-block;
   padding: 2px 0px;
 }
-/* line 114, ../../src/scss/ioki-treeview.scss */
-treeview > div:hover, treeview > div.selected {
+/* line 138, ../../src/scss/ioki-treeview.scss */
+treeview > treeview-node treeview-node-body:hover, treeview > treeview-node treeview-node-body.selected {
   color: #fff;
   background: #006da4;
 }
-/* line 118, ../../src/scss/ioki-treeview.scss */
-treeview > div:hover .add-node, treeview > div:hover .remove-node, treeview > div:hover .expander, treeview > div.selected .add-node, treeview > div.selected .remove-node, treeview > div.selected .expander {
+/* line 142, ../../src/scss/ioki-treeview.scss */
+treeview > treeview-node treeview-node-body:hover .add-node, treeview > treeview-node treeview-node-body:hover .remove-node, treeview > treeview-node treeview-node-body:hover .expander, treeview > treeview-node treeview-node-body:hover.dir.expanded .expander, treeview > treeview-node treeview-node-body.selected .add-node, treeview > treeview-node treeview-node-body.selected .remove-node, treeview > treeview-node treeview-node-body.selected .expander, treeview > treeview-node treeview-node-body.selected.dir.expanded .expander {
   color: #fff;
 }
-/* line 124, ../../src/scss/ioki-treeview.scss */
-treeview > ul {
+/* line 149, ../../src/scss/ioki-treeview.scss */
+treeview > treeview-node ul {
   padding-left: 10px;
   display: none;
   list-style-type: none;
 }
-/* line 129, ../../src/scss/ioki-treeview.scss */
-treeview > ul .separator {
+/* line 154, ../../src/scss/ioki-treeview.scss */
+treeview > treeview-node ul .separator {
   display: block;
   padding: 5px;
   font-weight: bold;
@@ -128,15 +137,15 @@ treeview > ul .separator {
   text-transform: uppercase;
   border: 1px dashed #bcbcbc;
 }
-/* line 142, ../../src/scss/ioki-treeview.scss */
+/* line 167, ../../src/scss/ioki-treeview.scss */
 treeview.dragging {
   cursor: pointer;
 }
-/* line 147, ../../src/scss/ioki-treeview.scss */
-treeview.dragging .dropToDir > div span.node-label {
+/* line 172, ../../src/scss/ioki-treeview.scss */
+treeview.dragging .dropToDir > treeview-node > treeview-node-body span.node-label {
   background: #ccc;
 }
-/* line 154, ../../src/scss/ioki-treeview.scss */
+/* line 179, ../../src/scss/ioki-treeview.scss */
 treeview.dragged {
   position: absolute;
   cursor: pointer;
@@ -149,13 +158,13 @@ treeview.dragged {
   box-shadow: 0 0 7px rgba(0, 0, 0, 0.35);
   opacity: .75;
 }
-/* line 158, ../../src/scss/ioki-treeview.scss */
-treeview.dragged > div {
+/* line 183, ../../src/scss/ioki-treeview.scss */
+treeview.dragged > treeview-node > treeview-node-body {
   color: #000;
   background-color: #fff;
   opacity: .75;
 }
-/* line 172, ../../src/scss/ioki-treeview.scss */
+/* line 197, ../../src/scss/ioki-treeview.scss */
 treeview.ghost {
   background-color: #fff;
   border: solid 1px #66afe9;
