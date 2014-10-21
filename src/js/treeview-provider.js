@@ -112,7 +112,7 @@ angular.module('ioki.treeview')
 
                     if (options.settings.rootSelected && _isRootNode(scope)) {
                         scope.treedata.selected = true;
-                        TreeviewManager.setSelectedNode(scope);
+                        TreeviewManager.setSelectedNode(scope.treedata);
                     }
                 }
 
@@ -201,7 +201,7 @@ angular.module('ioki.treeview')
                         }
 
                         if (scope.treedata.selected) {
-                            TreeviewManager.setSelectedNode(scope);
+                            TreeviewManager.setSelectedNode(scope.treedata);
                         } else {
                             TreeviewManager.unselectNode();
                         }

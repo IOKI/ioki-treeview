@@ -18,17 +18,41 @@ angular.module('ioki.treeview')
              *
              * Method selects new node and unselect previously selected.
              *
-             * @param newScope              - Object
+             * @param newNode              - Object
+             * @param refreshScope
              */
-            selectNode: function (newScope) {
-                newScope.$apply(function () {
-                    if (typeof TreeviewManager.selectedNode.treedata !== 'undefined') {
-                        TreeviewManager.selectedNode.treedata.selected = false;
-                    }
-                    newScope.treedata.selected = true;
+            selectNode: function (newNode, refreshScope) {
+                var newScope,
+                    parent,
+                    _makeSelection;
 
-                    TreeviewManager.setSelectedNode(newScope);
-                });
+
+                _makeSelection = function () {
+                    if (typeof TreeviewManager.selectedNode !== 'undefined') {
+                        TreeviewManager.selectedNode.selected = false;
+                    }
+                    newNode.selected = true;
+                    parent = newNode.getParent();
+
+                    // open to the selection
+                    while (parent !== null) {
+                        parent.expanded = true;
+                        parent = parent.getParent();
+                    }
+
+                    TreeviewManager.setSelectedNode(newNode);
+                };
+
+
+                if (angular.isFunction(newNode.getScope) && !!refreshScope) {
+                    newScope = newNode.getScope();
+
+                    newScope.$apply(function () {
+                        _makeSelection();
+                    });
+                } else {
+                    _makeSelection();
+                }
             },
 
             /**
@@ -37,12 +61,12 @@ angular.module('ioki.treeview')
              * Method sets selectedNode as given in argument.
              * It also broadcast newly selectedNode in whole application.
              *
-             * @param selectedNodeScope      - Object
+             * @param selectedNode          - Object
              */
-            setSelectedNode: function (selectedNodeScope) {
-                TreeviewManager.selectedNode = selectedNodeScope;
+            setSelectedNode: function (selectedNode) {
+                TreeviewManager.selectedNode = selectedNode;
 
-                $rootScope.$broadcast('treeview-selected', selectedNodeScope);
+                $rootScope.$broadcast('treeview-selected', selectedNode);
             },
 
             /**
@@ -67,9 +91,22 @@ angular.module('ioki.treeview')
                  * RESULT: close selected node
                  */
                 left: function () {
-                    TreeviewManager.selectedNode.$apply(function () {
-                        TreeviewManager.selectedNode.treedata.expanded = false;
-                    });
+                    var scope,
+                        _left;
+
+                    _left = function () {
+                        TreeviewManager.selectedNode.expanded = false;
+                    };
+
+                    if (angular.isFunction(TreeviewManager.selectedNode.getScope)) {
+                        scope = TreeviewManager.selectedNode.getScope();
+
+                        scope.$apply(function () {
+                            _left();
+                        });
+                    } else {
+                        _left();
+                    }
                 },
 
                 /**
@@ -78,9 +115,22 @@ angular.module('ioki.treeview')
                  * RESULT: open selected node
                  */
                 right: function () {
-                    TreeviewManager.selectedNode.$apply(function () {
-                        TreeviewManager.selectedNode.treedata.expanded = true;
-                    });
+                    var scope,
+                        _right;
+
+                    _right = function () {
+                        TreeviewManager.selectedNode.expanded = true;
+                    };
+
+                    if (angular.isFunction(TreeviewManager.selectedNode.getScope)) {
+                        scope = TreeviewManager.selectedNode.getScope();
+
+                        scope.$apply(function () {
+                            _right();
+                        });
+                    } else {
+                        _right();
+                    }
                 },
 
                 /**
@@ -95,23 +145,23 @@ angular.module('ioki.treeview')
                  *  - parent
                  */
                 top: function () {
-                    var node = TreeviewManager.selectedNode.treedata,
-                        parent = TreeviewManager.selectedNode.getParent(),
+                    var node = TreeviewManager.selectedNode,
+                        parent = node.getParent(),
                         index, prevElement, newSelectedNode, lastChildInPrevElement;
 
                     if (parent !== null) {
                         // node is not a root node
-                        index = parent.treedata.subnodes.indexOf(node);
+                        index = parent.subnodes.indexOf(node);
 
                         if (index > 0) {
                             // node has a previous sibling
 
-                            prevElement = parent.treedata.subnodes[index - 1];
-                            newSelectedNode = prevElement.getScope();
+                            prevElement = parent.subnodes[index - 1];
+                            newSelectedNode = prevElement;
 
                             while (prevElement.expanded && typeof prevElement.subnodes !== 'undefined' && prevElement.subnodes.length > 0) {
                                 lastChildInPrevElement = prevElement.subnodes[prevElement.subnodes.length - 1];
-                                newSelectedNode = lastChildInPrevElement.getScope();
+                                newSelectedNode = lastChildInPrevElement;
 
                                 prevElement = lastChildInPrevElement;
                             }
@@ -120,7 +170,7 @@ angular.module('ioki.treeview')
                             newSelectedNode = parent;
                         }
 
-                        TreeviewManager.selectNode(newSelectedNode);
+                        TreeviewManager.selectNode(newSelectedNode, true);
                     }
                 },
 
@@ -135,8 +185,8 @@ angular.module('ioki.treeview')
                  *  - next sibling
                  */
                 bottom: function () {
-                    var node = TreeviewManager.selectedNode.treedata,
-                        parent = TreeviewManager.selectedNode.getParent(),
+                    var node = TreeviewManager.selectedNode,
+                        parent = node.getParent(),
                         index, nextElement, newSelectedNode, beforeParent;
 
                     if (node.expanded && angular.isArray(node.subnodes) && typeof node.subnodes[0] !== 'undefined') {
@@ -147,37 +197,37 @@ angular.module('ioki.treeview')
                          ** so go to first child */
 
                         nextElement = node.subnodes[0];
-                        newSelectedNode = nextElement.getScope(nextElement);
+                        newSelectedNode = nextElement;
 
-                        TreeviewManager.selectNode(newSelectedNode);
+                        TreeviewManager.selectNode(newSelectedNode, true);
                     } else if (parent !== null) {
-                        index = parent.treedata.subnodes.indexOf(node);
+                        index = parent.subnodes.indexOf(node);
 
-                        if (typeof parent.treedata.subnodes[index + 1] !== 'undefined') {
+                        if (typeof parent.subnodes[index + 1] !== 'undefined') {
                             // node is not last in subnodes array
 
-                            nextElement = parent.treedata.subnodes[index + 1];
-                            newSelectedNode = nextElement.getScope();
+                            nextElement = parent.subnodes[index + 1];
+                            newSelectedNode = nextElement;
                         } else {
                             // it is the last node
                             do {
                                 beforeParent = parent.getParent();
 
                                 if (beforeParent !== null) {
-                                    index = beforeParent.treedata.subnodes.indexOf(parent.treedata);
+                                    index = beforeParent.subnodes.indexOf(parent);
 
                                     parent = beforeParent;
 
-                                    if (typeof beforeParent.treedata.subnodes[index + 1] !== 'undefined') {
-                                        nextElement = beforeParent.treedata.subnodes[index + 1];
-                                        newSelectedNode = nextElement.getScope();
+                                    if (typeof beforeParent.subnodes[index + 1] !== 'undefined') {
+                                        nextElement = beforeParent.subnodes[index + 1];
+                                        newSelectedNode = nextElement;
                                     }
                                 }
-                            } while (beforeParent !== null && typeof beforeParent.treedata.subnodes[index + 1] === 'undefined');
+                            } while (beforeParent !== null && typeof beforeParent.subnodes[index + 1] === 'undefined');
                         }
 
                         if (typeof newSelectedNode !== 'undefined') {
-                            TreeviewManager.selectNode(newSelectedNode);
+                            TreeviewManager.selectNode(newSelectedNode, true);
                         }
                     }
                 },

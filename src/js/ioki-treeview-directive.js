@@ -5,7 +5,8 @@ angular.module('ioki.treeview', [
         'use strict';
 
         var rootParent,
-            settings = {};
+            settings = {},
+            isOnRootScopeActionHappen = false;
 
         return {
             restrict: "E",
@@ -15,6 +16,87 @@ angular.module('ioki.treeview', [
                 treesettings: '=?'
             },
             compile: function (element) {
+
+                /**
+                 * Private method onNodeAction
+                 *
+                 * Method provides additional API and properties for each node on tree structure
+                 *
+                 * @param node                  - Object
+                 * @param parent                - Object / Null Object
+                 * @private
+                 */
+                function _onNodeAction (node, parent) {
+                    /**
+                     * Method getParent
+                     *
+                     * Method return parent of the node
+                     *
+                     * @returns {*}
+                     */
+                    node.getParent = function () {
+                        return parent;
+                    };
+
+                    /**
+                     * Method getNext
+                     *
+                     * Method returns next node in subnodes array or null if current node is last in array
+                     *
+                     * @returns {*}
+                     */
+                    node.getNext = function () {
+                        var index,
+                            nextNode;
+
+                        if (parent !== null) {
+                            index = parent.subnodes.indexOf(node);
+                            nextNode = parent.subnodes[index+1];
+
+                            return (typeof nextNode !== 'undefined') ? nextNode : null;
+                        } else {
+                            return null;
+                        }
+                    };
+
+                    /**
+                     * Method getPrev
+                     *
+                     * Method returns previous node in subnodes array or null if current node is first in array
+                     *
+                     * @returns {*}
+                     */
+                    node.getPrev = function () {
+                        var index,
+                            prevNode;
+
+                        if (parent !== null) {
+                            index = parent.subnodes.indexOf(node);
+                            prevNode = parent.subnodes[index-1];
+
+                            return (typeof prevNode !== 'undefined') ? prevNode : null;
+                        } else {
+                            return null;
+                        }
+                    };
+
+                    /*
+                        Add levels indicators to nested subtrees.
+                     */
+                    node.level = (parent === null) ? 1 : parent.level + 1;
+
+                    if (angular.isArray(node.subnodes)) {
+                        for (var i = 0, len = node.subnodes.length; i < len; i++) {
+                            _onNodeAction(node.subnodes[i], node);
+                        }
+                    }
+                }
+
+                function _onRootScopeAction(scope) {
+                    var rootNode = scope.treedata;
+
+                    _onNodeAction(rootNode, null);
+                }
 
                 // cache root
                 // beside recursive nature of treeview the code below will be executed exactly once
@@ -43,6 +125,11 @@ angular.module('ioki.treeview', [
                             isDroppable:    false
                         };
 
+                    if (!isOnRootScopeActionHappen) {
+                        _onRootScopeAction(scope);
+                        isOnRootScopeActionHappen = true;
+                    }
+
                     /*
                         Copy settings given by user to nested nodes. Cache them in settings object.
                      */
@@ -52,23 +139,15 @@ angular.module('ioki.treeview', [
                     scope.settings = settings;
 
                     /*
-                        Add levels indicators to nested subtrees.
                         Expand treeview to given level if there is a need.
                      */
                     if (angular.isNumber(settings.expandToLevel)) {
-                        if (typeof scope.$parent.treedata === 'undefined') {
-                            scope.treedata.level = 1;
-                        } else {
-                            scope.treedata.level = scope.$parent.treedata.level + 1;
-                        }
-
                         scope.treedata.expanded = (scope.treedata.level < settings.expandToLevel);
                     }
 
                     /*
                         Initialization phase callback.
                      */
-
                     if (typeof scope.settings.customMethods !== 'undefined' && angular.isFunction(scope.settings.customMethods.init)) {
                         scope.settings.customMethods.init(scope, element);
                     }
@@ -191,7 +270,7 @@ angular.module('ioki.treeview', [
                                     width:  elementWidth            + 'px'
                                 });
 
-                            if (typeof scope.settings.customMethods === 'undefined' && angular.isFunction(scope.settings.customMethods.dragStart)) {
+                            if (typeof scope.settings.customMethods !== 'undefined' && angular.isFunction(scope.settings.customMethods.dragStart)) {
                                 scope.settings.customMethods.dragStart(rootParent, scope, element);
                             }
 
@@ -375,13 +454,13 @@ angular.module('ioki.treeview', [
                                 /*  Custom method for DRAG END
                                  If there is no any custom method for Drag End - resolve promise and finalize dropping action
                                  */
-                                if (typeof scope.settings.customMethods === 'undefined' && angular.isFunction(scope.settings.customMethods.dragEnd)) {
+                                if (typeof scope.settings.customMethods !== 'undefined' && angular.isFunction(scope.settings.customMethods.dragEnd)) {
                                     scope.settings.customMethods.dragEnd(target.isDroppable, rootParent, scope, target, deferred);
                                 } else {
                                     deferred.resolve(elementIndexToAdd);
                                 }
                             } else {
-                                if (typeof scope.settings.customMethods === 'undefined' && angular.isFunction(scope.settings.customMethods.dragEnd)) {
+                                if (typeof scope.settings.customMethods !== 'undefined' && angular.isFunction(scope.settings.customMethods.dragEnd)) {
                                     scope.settings.customMethods.dragEnd(target.isDroppable, rootParent, scope, target, deferred);
                                 }
                             }
