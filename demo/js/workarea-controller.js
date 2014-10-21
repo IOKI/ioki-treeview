@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('app').controller('WorkareaController', ['$scope', '$modal', '$treeview', 'treeData', 'treeAvailableNodes', 'TreeviewManager', function ($scope, $modal, $treeview, treeData, treeAvailableNodes, TreeviewManager) {
+angular.module('app').controller('WorkareaController', ['$scope', '$modal', '$treeview', 'treeData', 'treeAvailableNodes', function ($scope, $modal, $treeview, treeData, treeAvailableNodes) {
 
     $scope.$on('treeview-selected', function (event, selectedNode) {
         var parent = selectedNode.getParent();
@@ -18,14 +18,6 @@ angular.module('app').controller('WorkareaController', ['$scope', '$modal', '$tr
 
     $scope.tData = treeData.data;
     $scope.subnodes = treeAvailableNodes.data;
-
-    $scope.select9 = function () {
-        var node9 = $scope.tData[0].subnodes[0].subnodes[1].subnodes[0];
-
-        TreeviewManager.selectNode(node9);
-
-        console.log(node9, node9.getParent());
-    };
 
     /**
      * EXAMPLE: Custom addNode method
