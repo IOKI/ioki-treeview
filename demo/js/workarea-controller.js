@@ -2,22 +2,28 @@
 
 angular.module('app').controller('WorkareaController', ['$scope', '$modal', '$treeview', 'treeData', 'treeAvailableNodes', function ($scope, $modal, $treeview, treeData, treeAvailableNodes) {
 
-    $scope.$on('treeview-selected', function (event, selectedNode) {
+    $scope.$on('treeview-selected', function (event, selectedNode, treeid) {
+//        console.log('treeview-selected', event, selectedNode, treeid);
+
         var parent = selectedNode.getParent();
 
-        $scope.selected = selectedNode;
-
-        if (parent !== null) {
-            $scope.parent = parent;
+        if (typeof $scope.selected[treeid] === 'undefined') {
+            $scope.selected[treeid] = {};
         }
+
+        $scope.selected[treeid].node = selectedNode;
+        $scope.selected[treeid].treeid = treeid;
+        $scope.selected[treeid].parent = parent;
     });
 
     $scope.$on('treeview-unselected', function () {
         $scope.selected = null;
     });
 
-    $scope.tData = treeData.data;
+    $scope.treeFirst = treeData.treeFirst;
+    $scope.treeSecond = treeData.treeSecond;
     $scope.subnodes = treeAvailableNodes.data;
+    $scope.selected = {};
 
     /**
      * EXAMPLE: Custom addNode method

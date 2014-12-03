@@ -112,7 +112,8 @@ angular.module('ioki.treeview')
 
                     if (options.settings.rootSelected && _isRootNode(scope)) {
                         scope.treedata.selected = true;
-                        TreeviewManager.setSelectedNode(scope.treedata);
+
+                        TreeviewManager.setSelectedNode(scope.treedata, scope.treeid);
                     }
                 }
 
@@ -201,7 +202,7 @@ angular.module('ioki.treeview')
                         }
 
                         if (scope.treedata.selected) {
-                            TreeviewManager.setSelectedNode(scope.treedata);
+                            TreeviewManager.setSelectedNode(scope.treedata, scope.treeid);
                         } else {
                             TreeviewManager.unselectNode();
                         }
@@ -268,7 +269,7 @@ angular.module('ioki.treeview')
                         parent.treedata.selected = true;
 
                         if (node.selected) {
-                            TreeviewManager.setSelectedNode(parent);
+                            TreeviewManager.setSelectedNode(parent, scope.treeid);
                         }
                     }
                 }

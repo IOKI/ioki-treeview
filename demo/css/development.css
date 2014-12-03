@@ -1,3 +1,7 @@
 .col-md-4 {
     position: static;
 }
+
+.secondTree treeview > treeview-node treeview-node-body.selected, .secondTree treeview > treeview-node treeview-node-body:hover {
+    background: #3ba44e;
+}

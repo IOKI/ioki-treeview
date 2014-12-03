@@ -21,12 +21,20 @@
             <!-- Enjoy this space and use it wisely. Good Luck! -->
             <div class="row show-grid">
                 <div class="col-md-4">
-                    <treeview treedata="treeData" treesettings="treeSettings" ng-repeat="treeData in tData"></treeview>
+                    <treeview treedata="treeData" treesettings="treeSettings" treeid="1" ng-repeat="treeData in treeFirst"></treeview>
                 </div>
-                <div class="col-md-8">
-                    Content area<br/>
-                    <br/>selected: {{selected.name}}
-                    <br/>parent: {{parent.name}}</div>
+                <div class="col-md-4">
+                    <h2>Trees Manager look-up</h2>
+
+                    <div ng-repeat="selectedTree in selected">
+                        <h3>Tree {{selectedTree.treeid}}</h3>
+                        <p>selected: {{selectedTree.node.name}}</p>
+                        <p>parent: {{selectedTree.parent.name}}</p>
+                    </div>
+                </div>
+                <div class="col-md-4 secondTree">
+                    <treeview treedata="treeData" treesettings="treeSettings" treeid="2" ng-repeat="treeData in treeSecond"></treeview>
+                </div>
             </div>
         </div>
     </div>

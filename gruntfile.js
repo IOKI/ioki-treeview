@@ -26,10 +26,10 @@ module.exports = function(grunt) {
         connect: {
             server: {
                 options: {
-                    port: 9000,
+                    port: 9050,
                     hostname: 'localhost',
                     open: {
-                        target: 'http://localhost:9000/demo/development.html'
+                        target: 'http://localhost:9050/demo/development.html'
                     },
                     keepalive: true
                 }
