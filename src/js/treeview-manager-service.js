@@ -29,6 +29,11 @@ angular.module('ioki.treeview')
                     TreeviewManager.trees[scope.treeid] = {};
                     TreeviewManager.trees[scope.treeid].scope = scope;
                     TreeviewManager.trees[scope.treeid].element = element;
+
+                    // Clean after yourself - remove tree after scope destroy
+                    TreeviewManager.trees[scope.treeid].scope.$on('$destroy', function () {
+                        delete TreeviewManager.trees[scope.treeid];
+                    });
                 }
             },
 
