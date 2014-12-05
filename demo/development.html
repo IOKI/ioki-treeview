@@ -21,7 +21,7 @@
             <!-- Enjoy this space and use it wisely. Good Luck! -->
             <div class="row show-grid">
                 <div class="col-md-4">
-                    <treeview treedata="treeData" treesettings="treeSettings" treeid="1" ng-repeat="treeData in treeFirst"></treeview>
+                    <treeview treedata="treeData" treesettings="treeSettings" treeid="1" tree-allow-copy="true" ng-repeat="treeData in treeFirst"></treeview>
                 </div>
                 <div class="col-md-4">
                     <h2>Trees Manager look-up</h2>
@@ -33,7 +33,7 @@
                     </div>
                 </div>
                 <div class="col-md-4 secondTree">
-                    <treeview treedata="treeData" treesettings="treeSettings" treeid="2" ng-repeat="treeData in treeSecond"></treeview>
+                    <treeview treedata="treeData" treesettings="treeSettings" treeid="2" tree-allow-copy="true" ng-repeat="treeData in treeSecond"></treeview>
                 </div>
             </div>
         </div>

@@ -12,7 +12,8 @@ angular.module('ioki.treeview', [
             scope: {
                 treedata: '=',
                 treesettings: '=?',
-                treeid: '=?'
+                treeid: '=?',
+                treeAllowCopy: '=?'
             },
             compile: function (element) {
 
@@ -408,7 +409,7 @@ angular.module('ioki.treeview', [
                      * Remove listeners
                      */
                     function mouseup() {
-                        var currentNode,
+                        var currentNode, newCopyOfNode,
                             elementIndexToAdd, elementIndexToRemove,
                             addAfterElement,
                             parentScopeData,
@@ -459,6 +460,7 @@ angular.module('ioki.treeview', [
                                         target.node.subnodes.splice(newElementIndex, 0, currentNode);
                                     } else {
                                         // Check if node is comming from another treeview
+                                        // and if copying is allowed
                                         if (currentNode.getScope().treeid !== target.node.getScope().treeid) {
                                             // If node was selected and is comming from another tree we need to select parent node in old tree
                                             if (currentNode.selected) {
@@ -472,8 +474,16 @@ angular.module('ioki.treeview', [
                                             currentNode.id = newId;
                                         }
 
-                                        target.node.subnodes.splice(newElementIndex, 0, currentNode);
-                                        parentScopeData.subnodes.splice(elementIndexToRemove, 1);
+                                        if (currentNode.getScope().treeid !== target.node.getScope().treeid && TreeviewManager.trees[scope.treeid].scope.treeAllowCopy) {
+                                            // makes copy of node
+                                            newCopyOfNode = angular.copy(currentNode);
+
+                                            target.node.subnodes.splice(newElementIndex, 0, newCopyOfNode);
+                                        } else {
+                                            // cut node from one tree and put into another
+                                            target.node.subnodes.splice(newElementIndex, 0, currentNode);
+                                            parentScopeData.subnodes.splice(elementIndexToRemove, 1);
+                                        }
 
                                         // Crucial timing - after adding to new tree and delete from old one
                                         // There is a need to reassign new parent for dragged node

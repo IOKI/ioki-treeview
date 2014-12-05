@@ -20,7 +20,8 @@ angular.module('ioki.treeview')
             },
 
             addTree: function (scope, element) {
-                // Checks if TreeviewManager.trees is empty. If is - focus on this tree.
+                /* Checks if TreeviewManager.trees is empty. If it is - focus on this tree.
+                   Result: focus on the first compiled tree */
                 if (Object.keys(TreeviewManager.trees).length === 0) {
                     TreeviewManager.focusedTree = scope.treeid;
                 }
@@ -30,7 +31,11 @@ angular.module('ioki.treeview')
                     TreeviewManager.trees[scope.treeid].scope = scope;
                     TreeviewManager.trees[scope.treeid].element = element;
 
-                    // Clean after yourself - remove tree after scope destroy
+                    if (typeof TreeviewManager.trees[scope.treeid].scope.treeAllowCopy === 'undefined') {
+                        TreeviewManager.trees[scope.treeid].scope.treeAllowCopy = false;
+                    }
+
+                    // Clean after yourself - remove tree after scope is destroyed
                     TreeviewManager.trees[scope.treeid].scope.$on('$destroy', function () {
                         delete TreeviewManager.trees[scope.treeid];
                     });
