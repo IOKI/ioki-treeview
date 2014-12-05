@@ -61,7 +61,8 @@ angular.module('ioki.treeview', [
             scope: {
                 treedata: '=',
                 treesettings: '=?',
-                treeid: '=?'
+                treeid: '=?',
+                treeAllowCopy: '=?'
             },
             compile: function (element) {
 
@@ -457,7 +458,7 @@ angular.module('ioki.treeview', [
                      * Remove listeners
                      */
                     function mouseup() {
-                        var currentNode,
+                        var currentNode, newCopyOfNode,
                             elementIndexToAdd, elementIndexToRemove,
                             addAfterElement,
                             parentScopeData,
@@ -508,6 +509,7 @@ angular.module('ioki.treeview', [
                                         target.node.subnodes.splice(newElementIndex, 0, currentNode);
                                     } else {
                                         // Check if node is comming from another treeview
+                                        // and if copying is allowed
                                         if (currentNode.getScope().treeid !== target.node.getScope().treeid) {
                                             // If node was selected and is comming from another tree we need to select parent node in old tree
                                             if (currentNode.selected) {
@@ -521,8 +523,16 @@ angular.module('ioki.treeview', [
                                             currentNode.id = newId;
                                         }
 
-                                        target.node.subnodes.splice(newElementIndex, 0, currentNode);
-                                        parentScopeData.subnodes.splice(elementIndexToRemove, 1);
+                                        if (currentNode.getScope().treeid !== target.node.getScope().treeid && TreeviewManager.trees[scope.treeid].scope.treeAllowCopy) {
+                                            // makes copy of node
+                                            newCopyOfNode = angular.copy(currentNode);
+
+                                            target.node.subnodes.splice(newElementIndex, 0, newCopyOfNode);
+                                        } else {
+                                            // cut node from one tree and put into another
+                                            target.node.subnodes.splice(newElementIndex, 0, currentNode);
+                                            parentScopeData.subnodes.splice(elementIndexToRemove, 1);
+                                        }
 
                                         // Crucial timing - after adding to new tree and delete from old one
                                         // There is a need to reassign new parent for dragged node
@@ -991,7 +1001,8 @@ angular.module('ioki.treeview')
             },
 
             addTree: function (scope, element) {
-                // Checks if TreeviewManager.trees is empty. If is - focus on this tree.
+                /* Checks if TreeviewManager.trees is empty. If it is - focus on this tree.
+                   Result: focus on the first compiled tree */
                 if (Object.keys(TreeviewManager.trees).length === 0) {
                     TreeviewManager.focusedTree = scope.treeid;
                 }
@@ -1001,7 +1012,11 @@ angular.module('ioki.treeview')
                     TreeviewManager.trees[scope.treeid].scope = scope;
                     TreeviewManager.trees[scope.treeid].element = element;
 
-                    // Clean after yourself - remove tree after scope destroy
+                    if (typeof TreeviewManager.trees[scope.treeid].scope.treeAllowCopy === 'undefined') {
+                        TreeviewManager.trees[scope.treeid].scope.treeAllowCopy = false;
+                    }
+
+                    // Clean after yourself - remove tree after scope is destroyed
                     TreeviewManager.trees[scope.treeid].scope.$on('$destroy', function () {
                         delete TreeviewManager.trees[scope.treeid];
                     });
