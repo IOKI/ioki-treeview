@@ -458,11 +458,12 @@ angular.module('ioki.treeview', [
                      * Remove listeners
                      */
                     function mouseup() {
-                        var currentNode, newCopyOfNode,
+                        var currentNode,
                             elementIndexToAdd, elementIndexToRemove,
                             addAfterElement,
                             parentScopeData,
                             deferred = $q.defer(),
+                            newCopyOfNode = {},
                             promise = deferred.promise;
 
                         if (isMoving) {
@@ -509,7 +510,6 @@ angular.module('ioki.treeview', [
                                         target.node.subnodes.splice(newElementIndex, 0, currentNode);
                                     } else {
                                         // Check if node is comming from another treeview
-                                        // and if copying is allowed
                                         if (currentNode.getScope().treeid !== target.node.getScope().treeid) {
                                             // If node was selected and is comming from another tree we need to select parent node in old tree
                                             if (currentNode.selected) {
@@ -520,24 +520,36 @@ angular.module('ioki.treeview', [
                                             // Assigning new id for node to avoid duplicates
                                             // Developer can provide his own id and probably should
                                             newId = newId || TreeviewManager.makeNewNodeId();
-                                            currentNode.id = newId;
-                                        }
 
-                                        if (currentNode.getScope().treeid !== target.node.getScope().treeid && TreeviewManager.trees[scope.treeid].scope.treeAllowCopy) {
-                                            // makes copy of node
-                                            newCopyOfNode = angular.copy(currentNode);
+                                            if (TreeviewManager.trees[scope.treeid].scope.treeAllowCopy) {
+                                                // makes copy of node
+                                                newCopyOfNode = {
+                                                    id: newId,
+                                                    name: currentNode.name,
+                                                    type: currentNode.type,
+                                                    level: ++target.node.level,
+                                                    getParent: function () {
+                                                        return target.node;
+                                                    }
+                                                };
 
-                                            target.node.subnodes.splice(newElementIndex, 0, newCopyOfNode);
+                                                if (angular.isArray(currentNode.subnodes)) {
+                                                    newCopyOfNode.subnodes = angular.copy(currentNode.subnodes);
+                                                }
+
+                                                target.node.subnodes.splice(newElementIndex, 0, newCopyOfNode);
+                                            } else {
+                                                // cut node from one tree and put into another
+                                                currentNode.id = newId;
+
+                                                target.node.subnodes.splice(newElementIndex, 0, currentNode);
+                                                parentScopeData.subnodes.splice(elementIndexToRemove, 1);
+
+                                                currentNode.setParent(target.node);
+                                            }
                                         } else {
-                                            // cut node from one tree and put into another
                                             target.node.subnodes.splice(newElementIndex, 0, currentNode);
                                             parentScopeData.subnodes.splice(elementIndexToRemove, 1);
-                                        }
-
-                                        // Crucial timing - after adding to new tree and delete from old one
-                                        // There is a need to reassign new parent for dragged node
-                                        if (currentNode.getScope().treeid !== target.node.getScope().treeid) {
-                                            currentNode.setParent(target.node);
                                         }
                                     }
                                 });
@@ -1316,7 +1328,7 @@ angular.module('ioki.treeview').run(['$templateCache', function($templateCache) 
     "           ng-click=\"$toggleNode()\"></i>\n" +
     "\n" +
     "        <!-- node icon -->\n" +
-    "        <i class=\"fa node-icon\"></i>\n" +
+    "        <i class=\"fa node-icon\"></i> {{ treedata.id }}\n" +
     "\n" +
     "        <!-- node label -->\n" +
     "        <span class=\"node-label\" ng-bind=\"treedata.name\" ng-click=\"optionalNodeCtrl.someMethod()\"></span>\n" +

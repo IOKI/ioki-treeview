@@ -414,7 +414,7 @@ angular.module('ioki.treeview', [
                             addAfterElement,
                             parentScopeData,
                             deferred = $q.defer(),
-                            newCopyOfNode = {}, newCopyOfNodeScope = {},
+                            newCopyOfNode = {},
                             promise = deferred.promise;
 
                         if (isMoving) {
