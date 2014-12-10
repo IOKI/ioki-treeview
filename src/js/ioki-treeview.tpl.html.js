@@ -16,7 +16,7 @@ angular.module('ioki.treeview').run(['$templateCache', function($templateCache) 
     "           ng-click=\"$toggleNode()\"></i>\n" +
     "\n" +
     "        <!-- node icon -->\n" +
-    "        <i class=\"fa node-icon\"></i> {{ treedata.id }}\n" +
+    "        <i class=\"fa node-icon\"></i>\n" +
     "\n" +
     "        <!-- node label -->\n" +
     "        <span class=\"node-label\" ng-bind=\"treedata.name\" ng-click=\"optionalNodeCtrl.someMethod()\"></span>\n" +

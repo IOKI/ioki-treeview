@@ -451,10 +451,12 @@ angular.module('ioki.treeview', [
                                         elementIndexToAdd = target.node.subnodes.indexOf(addAfterElement);
                                     }
                                 }
+                                target.elementIndexToAdd = elementIndexToAdd;
 
                                 // "Resolve" promise - rearrange nodes
-                                promise.then(function (index, newId) {
-                                    var newElementIndex = index || 0;
+                                promise.then(function (passedObj) {
+                                    var newElementIndex = passedObj.index || 0,
+                                        newId;
 
                                     if (target.node.subnodes === parentScopeData.subnodes && newElementIndex < elementIndexToRemove) {
                                         parentScopeData.subnodes.splice(elementIndexToRemove, 1);
@@ -470,23 +472,16 @@ angular.module('ioki.treeview', [
 
                                             // Assigning new id for node to avoid duplicates
                                             // Developer can provide his own id and probably should
-                                            newId = newId || TreeviewManager.makeNewNodeId();
+                                            newId = passedObj.newId || TreeviewManager.makeNewNodeId();
 
                                             if (TreeviewManager.trees[scope.treeid].scope.treeAllowCopy) {
                                                 // makes copy of node
-                                                newCopyOfNode = {
-                                                    id: newId,
-                                                    name: currentNode.name,
-                                                    type: currentNode.type,
-                                                    level: ++target.node.level,
-                                                    getParent: function () {
-                                                        return target.node;
-                                                    }
+                                                newCopyOfNode = angular.copy(currentNode);
+                                                newCopyOfNode.id = newId;
+                                                newCopyOfNode.level = ++target.node.level;
+                                                newCopyOfNode.getParent = function () {
+                                                    return target.node;
                                                 };
-
-                                                if (angular.isArray(currentNode.subnodes)) {
-                                                    newCopyOfNode.subnodes = angular.copy(currentNode.subnodes);
-                                                }
 
                                                 target.node.subnodes.splice(newElementIndex, 0, newCopyOfNode);
                                             } else {
@@ -511,7 +506,7 @@ angular.module('ioki.treeview', [
                                 if (typeof scope.settings.customMethods !== 'undefined' && angular.isFunction(scope.settings.customMethods.dragEnd)) {
                                     scope.settings.customMethods.dragEnd(target.isDroppable, TreeviewManager.trees[scope.treeid].element, scope, target, deferred);
                                 } else {
-                                    deferred.resolve(elementIndexToAdd);
+                                    deferred.resolve({index: elementIndexToAdd});
                                 }
                             } else {
                                 if (typeof scope.settings.customMethods !== 'undefined' && angular.isFunction(scope.settings.customMethods.dragEnd)) {
