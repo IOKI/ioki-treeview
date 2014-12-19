@@ -35,6 +35,9 @@ angular.module('ioki.treeview')
                     /* define if nodes are draggable or not */
                     draggable: true,
 
+                    /* define if user can navigate through treeview by keyboard */
+                    disallowKeyboardNavigation: false,
+
                     /* treeview offers custom methods via controller's scope */
                     customMethods: {
                         /* addNode method */

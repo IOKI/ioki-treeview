@@ -78,6 +78,7 @@ angular.module('app').controller('WorkareaController', ['$scope', '$modal', '$tr
         selectable: true,
         rootSelected: true,
         expandAll: false,
+        disallowKeyboardNavigation: false,
 
         icons: {
             'directory': {
