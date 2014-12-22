@@ -42,6 +42,8 @@ angular.module('ioki.treeview')
                     customMethods: {
                         /* addNode method */
                         addNode: null,
+                        /* callback after node selection */
+                        afterNodeSelectCallback: null,
                         /* removeNode method */
                         removeNode: null,
                         /* method is called when node is started to drag (fire once) */
@@ -202,6 +204,10 @@ angular.module('ioki.treeview')
 
                             // change state of clicked element on opposite state
                             scope.treedata.selected = !state;
+                        }
+
+                        if (angular.isFunction(options.settings.customMethods.afterNodeSelectCallback)) {
+                            options.settings.customMethods.afterNodeSelectCallback(scope.treedata);
                         }
 
                         if (scope.treedata.selected) {

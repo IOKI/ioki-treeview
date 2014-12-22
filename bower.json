@@ -1,6 +1,6 @@
 {
   "name": "ioki-treeview",
-  "version": "0.2.6",
+  "version": "0.2.7",
   "ignore": [
     "demo",
     "node_modules",
